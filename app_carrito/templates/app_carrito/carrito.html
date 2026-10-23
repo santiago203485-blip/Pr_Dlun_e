@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Mi carrito{% endblock %}
+{% block contenido %}
+<h1>🛒 Mi carrito</h1>
+{% if items %}
+<div class="grid-2">
+    <div class="tarjeta tabla-contenedor" style="grid-column: span 1">
+        <table>
+            <thead><tr><th>Producto</th><th>Talla / Color</th><th>Cantidad</th><th class="numero">Subtotal</th><th></th></tr></thead>
+            <tbody>
+            {% for item in items %}
+                <tr>
+                    <td><a href="{% url 'catalogo:detalle' item.producto.pk %}">{{ item.producto.nombre }}</a><br><small class="texto-gris">{{ item.producto.precio_venta|pesos }} c/u</small></td>
+                    <td>{{ item.talla }} / {{ item.color }}</td>
+                    <td>
+                        <form method="post" action="{% url 'carrito:actualizar' item.id %}" class="acciones">
+                            {% csrf_token %}
+                            <input type="number" name="cantidad" value="{{ item.cantidad }}" min="0" max="{{ item.producto.stock }}" style="width:70px">
+                            <button class="btn-pequeno btn-secundario">↻</button>
+                        </form>
+                    </td>
+                    <td class="numero">{{ item.subtotal|pesos }}</td>
+                    <td>
+                        <form method="post" action="{% url 'carrito:eliminar' item.id %}">
+                            {% csrf_token %}<button class="btn-pequeno btn-peligro" title="Eliminar">✕</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="tarjeta">
+        <h3>Resumen</h3>
+        <table class="resumen">
+            <tr><td>Productos</td><td class="numero">{{ carrito.cantidad_total }}</td></tr>
+            <tr class="total"><td>Subtotal</td><td class="numero">{{ subtotal|pesos }}</td></tr>
+        </table>
+        <p class="ayuda">El domicilio, impuestos y cupones se calculan al confirmar el pedido.</p>
+        <a href="{% url 'pedidos:checkout' %}" class="btn" style="width:100%">Confirmar pedido</a>
+        <div class="acciones" style="margin-top:10px">
+            <a href="{% url 'catalogo:catalogo' %}" class="btn btn-secundario">Seguir comprando</a>
+            <form method="post" action="{% url 'carrito:vaciar' %}">{% csrf_token %}<button class="btn-secundario">Vaciar</button></form>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="tarjeta centrado">
+    <p>Tu carrito está vacío.</p>
+    <a href="{% url 'catalogo:catalogo' %}" class="btn">Ir al catálogo</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Factura #{{ venta.id }}{% endblock %}
+{% block contenido %}
+<div class="acciones no-imprimir" style="justify-content:center;margin-bottom:15px">
+    <button onclick="window.print()">🖨️ Imprimir</button>
+    <a href="{% url 'ventas:nueva' %}" class="btn btn-secundario">Nueva venta</a>
+    <a href="{% url 'ventas:lista' %}" class="btn btn-secundario">Ver ventas</a>
+</div>
+<div class="tarjeta factura">
+    <p class="centrado"><strong>{{ config.nombre_tienda|upper }}</strong><br>Pijamas con estampados{% if config.telefono_whatsapp %}<br>WhatsApp {{ config.telefono_whatsapp }}{% endif %}</p>
+    <p>Factura N° {{ venta.id }}<br>Fecha: {{ venta.fecha|date:"d/m/Y H:i" }}<br>Vendedor: {{ venta.vendedor }}<br>Cliente: {{ venta.cliente|default:"Mostrador" }}</p>
+    {% if venta.estado == 'anulada' %}<p class="centrado"><strong>*** VENTA ANULADA ***</strong></p>{% endif %}
+    <hr>
+    <table>
+        {% for d in venta.detalles.all %}
+            <tr><td colspan="2">{{ d.producto.nombre }}</td></tr>
+            <tr><td>{{ d.cantidad }} x {{ d.precio_unitario|pesos }}</td><td class="numero">{{ d.subtotal|pesos }}</td></tr>
+        {% endfor %}
+    </table>
+    <hr>
+    <table>
+        <tr><td>Subtotal</td><td class="numero">{{ venta.subtotal|pesos }}</td></tr>
+        <tr><td>Impuesto</td><td class="numero">{{ venta.impuesto|pesos }}</td></tr>
+        <tr><td><strong>TOTAL</strong></td><td class="numero"><strong>{{ venta.total|pesos }}</strong></td></tr>
+        <tr><td>Pago</td><td class="numero">{{ venta.get_metodo_pago_display }}</td></tr>
+    </table>
+    <hr>
+    <p class="centrado">¡Gracias por tu compra! 🌙</p>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block titulo %}Nueva venta{% endblock %}
+{% block contenido %}
+<h1>Registrar venta</h1>
+<form method="post">
+    {% csrf_token %}
+    <div class="grid-2">
+        <div class="tarjeta">
+            <h3>Datos de la venta</h3>
+            {{ form.as_p }}
+            <p class="ayuda">Si el cliente está registrado, la compra suma a su historial y clasificación VIP.</p>
+        </div>
+        <div class="tarjeta">
+            <h3>Productos</h3>
+            {{ formset.management_form }}
+            {{ formset.non_form_errors }}
+            <table>
+                <thead><tr><th>Producto</th><th style="width:110px">Cantidad</th></tr></thead>
+                <tbody>
+                {% for f in formset %}
+                    <tr>
+                        <td>{{ f.producto.errors }}{{ f.producto }}</td>
+                        <td>{{ f.cantidad.errors }}{{ f.cantidad }}</td>
+                    </tr>
+                    {% if f.non_field_errors %}<tr><td colspan="2">{{ f.non_field_errors }}</td></tr>{% endif %}
+                {% endfor %}
+                </tbody>
+            </table>
+            <p class="ayuda">Deja vacías las filas que no uses.</p>
+            <button type="submit" style="width:100%">Registrar venta</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

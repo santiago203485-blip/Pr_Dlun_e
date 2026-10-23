@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block titulo %}Cupones{% endblock %}
+{% block contenido %}
+<h1>Cupones de descuento</h1>
+<div class="grid-2">
+    <div class="tarjeta">
+        <h3>Nuevo cupón</h3>
+        <form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Crear</button></form>
+    </div>
+    <div class="tarjeta tabla-contenedor">
+        <table>
+            <thead><tr><th>Código</th><th class="numero">Descuento</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+            {% for c in cupones %}
+                <tr>
+                    <td><strong>{{ c.codigo }}</strong></td><td class="numero">{{ c.porcentaje|floatformat:0 }}%</td>
+                    <td>{% if c.activo %}<span class="etiqueta ok">Activo</span>{% else %}<span class="etiqueta">Inactivo</span>{% endif %}</td>
+                    <td><form method="post" action="{% url 'pagos:cupon_alternar' c.pk %}">{% csrf_token %}<button class="btn-pequeno btn-secundario">{% if c.activo %}Desactivar{% else %}Activar{% endif %}</button></form></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4" class="centrado texto-gris">Sin cupones.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

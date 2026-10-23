@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Mi perfil{% endblock %}
+{% block contenido %}
+<h1>Mi perfil</h1>
+<div class="grid-2">
+    <div class="tarjeta">
+        <h3>Datos personales</h3>
+        {% if user.foto %}<img src="{{ user.foto.url }}" alt="Foto" class="miniatura" style="width:80px;height:80px">{% endif %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Guardar cambios</button>
+        </form>
+        <p style="margin-top:15px"><a href="{% url 'usuarios:cambiar_contrasena' %}">Cambiar contraseña</a></p>
+    </div>
+
+    {% if user.es_cliente and user.cliente %}
+    <div>
+        <div class="tarjeta">
+            <h3>Mi cuenta {% if user.cliente.es_vip %}<span class="etiqueta vip">⭐ VIP</span>{% endif %}</h3>
+            <p>Compras realizadas: <strong>{{ user.cliente.total_compras }}</strong></p>
+            <p>Total comprado: <strong>{{ user.cliente.total_gastado|pesos }}</strong></p>
+            <p>Cliente desde: {{ user.cliente.fecha_registro }}</p>
+            <div class="acciones">
+                <a class="btn btn-secundario" href="{% url 'domicilios:direcciones' %}">Mis direcciones</a>
+                <a class="btn btn-secundario" href="{% url 'pedidos:mis_pedidos' %}">Mis pedidos</a>
+                <a class="btn btn-secundario" href="{% url 'notificaciones:mias' %}">Mis mensajes</a>
+            </div>
+        </div>
+        <div class="tarjeta">
+            <h3>Preferencias</h3>
+            <form method="post" action="{% url 'clientes:preferencias' %}">
+                {% csrf_token %}
+                <label><input type="checkbox" name="notificaciones_whatsapp" {% if user.cliente.notificaciones_whatsapp %}checked{% endif %}> Recibir notificaciones y promociones por WhatsApp</label>
+                <button type="submit" class="btn-pequeno" style="margin-top:8px">Guardar</button>
+            </form>
+        </div>
+        <div class="tarjeta">
+            <h3>Eliminar cuenta</h3>
+            <form method="post" action="{% url 'clientes:eliminar_cuenta' %}" onsubmit="return confirm('¿Seguro que quieres eliminar tu cuenta?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-peligro btn-pequeno">Eliminar mi cuenta</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

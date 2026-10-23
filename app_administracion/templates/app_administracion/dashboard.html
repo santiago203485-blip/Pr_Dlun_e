@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Panel de administración{% endblock %}
+{% block contenido %}
+<h1>Panel de administración</h1>
+
+<div class="estadisticas">
+    <div class="estadistica"><div class="valor">{{ ventas_hoy|pesos }}</div><div class="etiqueta">Ventas hoy</div></div>
+    <div class="estadistica"><div class="valor">{{ ventas_mes|pesos }}</div><div class="etiqueta">Ventas del mes</div></div>
+    <div class="estadistica"><div class="valor">{{ total_clientes }}</div><div class="etiqueta">Clientes ({{ total_vip }} VIP)</div></div>
+    <div class="estadistica" style="border-color:var(--alerta)"><div class="valor">{{ pedidos_pendientes }}</div><div class="etiqueta">Pedidos pendientes</div></div>
+</div>
+
+<div class="tarjeta">
+    <h3>Accesos rápidos</h3>
+    <div class="acciones">
+        <a class="btn" href="{% url 'catalogo:productos' %}">Productos</a>
+        <a class="btn" href="{% url 'catalogo:categorias' %}">Categorías</a>
+        <a class="btn" href="{% url 'ventas:nueva' %}">Nueva venta</a>
+        <a class="btn" href="{% url 'pedidos:gestion' %}">Pedidos</a>
+        <a class="btn" href="{% url 'pagos:lista' %}">Pagos</a>
+        <a class="btn" href="{% url 'clientes:lista' %}">Clientes</a>
+        <a class="btn" href="{% url 'notificaciones:masivo' %}">WhatsApp masivo</a>
+        <a class="btn" href="{% url 'personalizacion:gestion' %}">Diseños</a>
+        <a class="btn btn-secundario" href="{% url 'administracion:usuarios' %}">Usuarios</a>
+        <a class="btn btn-secundario" href="{% url 'domicilios:zonas' %}">Zonas domicilio</a>
+        <a class="btn btn-secundario" href="{% url 'domicilios:entregas' %}">Entregas</a>
+        <a class="btn btn-secundario" href="{% url 'pagos:cupones' %}">Cupones</a>
+        <a class="btn btn-secundario" href="{% url 'administracion:configuracion' %}">Configuración</a>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="tarjeta">
+        <h3>Ventas de los últimos 7 días</h3>
+        <div class="grafica">
+            {% for d in semana %}
+                <div class="barra-col" title="{{ d.total|pesos }}">
+                    <small>{% if d.total %}{{ d.total|pesos }}{% endif %}</small>
+                    <div class="barra" style="height: {{ d.porcentaje }}%"></div>
+                    <span class="dia">{{ d.dia|date:"D d" }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="tarjeta">
+        <h3>⚠️ Productos por agotarse</h3>
+        <table>
+            {% for p in stock_bajo %}
+                <tr class="{% if p.agotado %}agotado{% else %}stock-bajo{% endif %}"><td>{{ p.nombre }}</td><td class="numero">{{ p.stock }} / {{ p.stock_minimo }}</td>
+                    <td><a href="{% url 'inventario:movimiento' %}?producto={{ p.pk }}" class="btn btn-pequeno btn-secundario">Reabastecer</a></td></tr>
+            {% empty %}<tr><td class="texto-gris">Todo el inventario está bien. 👍</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+
+<div class="tarjeta tabla-contenedor">
+    <h3>Últimos pedidos</h3>
+    <table>
+        <thead><tr><th>Pedido</th><th>Cliente</th><th class="numero">Total</th><th>Estado</th><th>Fecha</th></tr></thead>
+        {% for p in ultimos_pedidos %}
+            <tr><td><a href="{% url 'pedidos:gestion_detalle' p.pk %}">#{{ p.id }}</a></td><td>{{ p.cliente.nombre }}</td><td class="numero">{{ p.total|pesos }}</td>
+                <td><span class="etiqueta {{ p.estado }}">{{ p.get_estado_display }}</span></td><td>{{ p.fecha|date:"d/m/Y H:i" }}</td></tr>
+        {% empty %}<tr><td colspan="5" class="texto-gris">Sin pedidos aún.</td></tr>{% endfor %}
+    </table>
+</div>
+{% endblock %}

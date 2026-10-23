@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block titulo %}Mis mensajes{% endblock %}
+{% block contenido %}
+<h1>Mis mensajes</h1>
+{% for n in notificaciones %}
+    <div class="tarjeta">
+        <small class="texto-gris">{{ n.fecha_envio|date:"d/m/Y H:i" }} · {{ n.get_tipo_display }}</small>
+        <p style="margin:5px 0 0">{{ n.contenido }}</p>
+    </div>
+{% empty %}
+    <p class="texto-gris">No tienes mensajes.</p>
+{% endfor %}
+{% endblock %}

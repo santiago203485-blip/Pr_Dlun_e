@@ -1,0 +1,12 @@
+{% load dlune %}
+<div class="producto">
+    <a href="{% url 'catalogo:detalle' p.pk %}" class="imagen">
+        {% if p.imagen %}<img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">{% else %}🌙{% endif %}
+    </a>
+    <div class="info">
+        <a href="{% url 'catalogo:detalle' p.pk %}" class="nombre">{{ p.nombre }}</a>
+        <small class="texto-gris">{{ p.categoria }} · {{ p.get_genero_display }}</small>
+        <span class="precio">{{ p.precio_venta|pesos }}</span>
+        {% if p.agotado %}<span class="etiqueta error">Agotado</span>{% else %}<span class="etiqueta ok">Disponible</span>{% endif %}
+    </div>
+</div>

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Pagar pedido #{{ pedido.id }}{% endblock %}
+{% block contenido %}
+<div class="tarjeta formulario" style="margin:0 auto">
+    <h1>Procesar pago</h1>
+    <p>Pedido <strong>#{{ pedido.id }}</strong> · Método: <strong>{{ pedido.get_metodo_pago_display }}</strong></p>
+    <p class="precio" style="font-size:1.8rem">{{ pedido.total|pesos }}</p>
+
+    {% if intentos %}
+        <ul class="mensajes"><li class="warning">Intentos rechazados: {{ intentos|length }}. Último motivo: {{ intentos.0.motivo_rechazo }}</li></ul>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if pedido.metodo_pago != 'tarjeta' %}{{ form.as_p }}{% endif %}
+        <p class="ayuda">🔒 Pasarela de pago simulada (prototipo). En producción aquí se conecta Wompi o PayU.
+            Elige la respuesta del banco para probar el flujo:</p>
+        <div class="acciones">
+            <button name="resultado" value="aprobar" class="btn-exito">✔ Simular pago aprobado</button>
+            <button name="resultado" value="rechazar" class="btn-peligro">✕ Simular pago rechazado</button>
+        </div>
+    </form>
+    <p style="margin-top:15px"><a href="{% url 'pedidos:detalle' pedido.pk %}">Pagar más tarde</a></p>
+</div>
+{% endblock %}

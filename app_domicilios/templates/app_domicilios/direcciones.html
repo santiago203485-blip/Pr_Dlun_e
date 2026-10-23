@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block titulo %}Mis direcciones{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>Mis direcciones</h1>
+    <a href="{% url 'domicilios:direccion_nueva' %}" class="btn">+ Agregar dirección</a>
+</div>
+<div class="grid">
+{% for d in direcciones %}
+    <div class="tarjeta">
+        {% if d.es_principal %}<span class="etiqueta ok">Principal</span>{% endif %}
+        <p><strong>{{ d.direccion_completa }}</strong><br>{{ d.barrio }}, {{ d.ciudad }} ({{ d.departamento }})</p>
+        <p class="texto-gris">📞 {{ d.telefono_contacto }}{% if d.instrucciones %}<br>{{ d.instrucciones }}{% endif %}</p>
+        {% if not d.validar_cobertura %}<p><span class="etiqueta alerta">Sin cobertura de domicilio</span></p>{% endif %}
+        <div class="acciones">
+            <a href="{% url 'domicilios:direccion_editar' d.pk %}" class="btn btn-pequeno btn-secundario">Editar</a>
+            <form method="post" action="{% url 'domicilios:direccion_eliminar' d.pk %}" onsubmit="return confirm('¿Eliminar esta dirección?');">
+                {% csrf_token %}<button class="btn-pequeno btn-peligro">Eliminar</button>
+            </form>
+        </div>
+    </div>
+{% empty %}
+    <p class="texto-gris">No tienes direcciones guardadas.</p>
+{% endfor %}
+</div>
+{% endblock %}

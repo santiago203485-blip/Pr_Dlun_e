@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block titulo %}Diseño #{{ diseno.id }}{% endblock %}
+{% block contenido %}
+<p><a href="{% url 'personalizacion:gestion' %}">← Solicitudes</a></p>
+<div class="grid-2">
+    <div class="tarjeta">
+        <h1>Diseño #{{ diseno.id }}</h1>
+        <p><strong>Cliente:</strong> {{ diseno.cliente.nombre }} · 📞 {{ diseno.cliente.telefono }}</p>
+        <p>{{ diseno.descripcion|linebreaksbr }}</p>
+        <p class="texto-gris">Talla {{ diseno.talla }} · {{ diseno.color }} · {{ diseno.cantidad }} und{% if diseno.producto_base %} · Base: {{ diseno.producto_base.nombre }}{% endif %}</p>
+        {% if diseno.imagen_referencia %}<img src="{{ diseno.imagen_referencia.url }}" alt="Referencia" style="max-height:300px;border-radius:8px">{% endif %}
+    </div>
+    <div class="tarjeta">
+        <h3>Responder al cliente</h3>
+        <form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Guardar y notificar</button></form>
+    </div>
+</div>
+{% endblock %}

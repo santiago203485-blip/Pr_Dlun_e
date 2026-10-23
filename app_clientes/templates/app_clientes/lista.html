@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Clientes{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>Clientes</h1>
+    {% if user.es_admin %}
+    <form method="post" action="{% url 'clientes:recalcular_vip' %}">{% csrf_token %}<button class="btn-secundario">⭐ Recalcular VIP</button></form>
+    {% endif %}
+</div>
+<form method="get" class="filtros">
+    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Nombre, correo o teléfono">
+    <label style="flex:0 0 auto;font-weight:normal"><input type="checkbox" name="vip" value="1" {% if request.GET.vip %}checked{% endif %}> Solo VIP</label>
+    <button type="submit">Buscar</button>
+</form>
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th>Cliente</th><th>Correo</th><th>Teléfono</th><th class="numero">Compras</th><th class="numero">Total gastado</th><th>Última compra</th><th></th></tr></thead>
+    <tbody>
+    {% for c in clientes %}
+        <tr>
+            <td>{{ c.nombre }} {% if c.es_vip %}<span class="etiqueta vip">⭐ VIP</span>{% endif %}</td>
+            <td>{{ c.email }}</td><td>{{ c.telefono }}</td>
+            <td class="numero">{{ c.total_compras }}</td><td class="numero">{{ c.total_gastado|pesos }}</td>
+            <td>{{ c.ultima_compra|date:"d/m/Y"|default:"Nunca" }}</td>
+            <td><a href="{% url 'clientes:detalle' c.pk %}" class="btn btn-pequeno btn-secundario">Ver</a></td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="7" class="centrado texto-gris">Sin clientes.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

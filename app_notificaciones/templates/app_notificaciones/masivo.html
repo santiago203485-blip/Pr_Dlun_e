@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block titulo %}WhatsApp masivo{% endblock %}
+{% block contenido %}
+<div class="tarjeta formulario">
+    <h1>📣 Campaña por WhatsApp</h1>
+    <p class="texto-gris">Solo se envía a clientes que aceptaron recibir mensajes por WhatsApp.</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Enviar campaña</button>
+        <a href="{% url 'notificaciones:lista' %}" class="btn btn-secundario">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

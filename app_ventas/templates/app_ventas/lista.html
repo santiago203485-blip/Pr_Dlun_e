@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Ventas{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>Ventas en tienda</h1>
+    <a href="{% url 'ventas:nueva' %}" class="btn">+ Nueva venta</a>
+</div>
+<form method="get" class="filtros">
+    <div><label for="fecha">Fecha</label><input type="date" id="fecha" name="fecha" value="{{ fecha|default:'' }}"></div>
+    <button type="submit">Filtrar</button>
+    <a href="{% url 'ventas:lista' %}" class="btn btn-secundario">Todas</a>
+</form>
+<div class="estadisticas">
+    <div class="estadistica"><div class="valor">{{ total|pesos }}</div><div class="etiqueta">Total vendido (activas)</div></div>
+    <div class="estadistica"><div class="valor">{{ ventas|length }}</div><div class="etiqueta">Ventas</div></div>
+</div>
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th>Venta</th><th>Fecha</th><th>Vendedor</th><th>Cliente</th><th>Pago</th><th class="numero">Total</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    {% for v in ventas %}
+        <tr>
+            <td>#{{ v.id }}</td><td>{{ v.fecha|date:"d/m/Y H:i" }}</td><td>{{ v.vendedor }}</td>
+            <td>{{ v.cliente|default:"Mostrador" }}</td><td>{{ v.get_metodo_pago_display }}</td>
+            <td class="numero">{{ v.total|pesos }}</td>
+            <td><span class="etiqueta {{ v.estado }}">{{ v.get_estado_display }}</span></td>
+            <td class="acciones">
+                <a href="{% url 'ventas:factura' v.pk %}" class="btn btn-pequeno btn-secundario">Factura</a>
+                {% if user.es_admin and v.estado == 'activa' %}
+                    <form method="post" action="{% url 'ventas:anular' v.pk %}" onsubmit="return confirm('¿Anular la venta #{{ v.id }}?');">
+                        {% csrf_token %}<button class="btn-pequeno btn-peligro">Anular</button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="8" class="centrado texto-gris">Sin ventas.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

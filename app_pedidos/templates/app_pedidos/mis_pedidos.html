@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Mis pedidos{% endblock %}
+{% block contenido %}
+<h1>Mis pedidos</h1>
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th>Pedido</th><th>Fecha</th><th>Entrega</th><th class="numero">Total</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    {% for p in pedidos %}
+        <tr>
+            <td>#{{ p.id }}</td><td>{{ p.fecha|date:"d/m/Y H:i" }}</td><td>{{ p.get_tipo_entrega_display }}</td>
+            <td class="numero">{{ p.total|pesos }}</td>
+            <td><span class="etiqueta {{ p.estado }}">{{ p.get_estado_display }}</span></td>
+            <td><a href="{% url 'pedidos:detalle' p.pk %}" class="btn btn-pequeno btn-secundario">Ver detalle</a></td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="6" class="centrado texto-gris">Aún no has hecho pedidos. <a href="{% url 'catalogo:catalogo' %}">Ir al catálogo</a></td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

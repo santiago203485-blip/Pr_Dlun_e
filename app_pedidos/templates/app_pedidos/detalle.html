@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block titulo %}Pedido #{{ pedido.id }}{% endblock %}
+{% block contenido %}
+<p><a href="{% url 'pedidos:mis_pedidos' %}">← Mis pedidos</a></p>
+<div class="cabecera">
+    <h1>Pedido #{{ pedido.id }}</h1>
+    <span class="etiqueta {{ pedido.estado }}" style="font-size:1rem">{{ pedido.get_estado_display }}</span>
+</div>
+
+<div class="grid-2">
+    <div class="tarjeta">
+        <h3>Productos</h3>
+        {% include 'includes/resumen_pedido.html' %}
+    </div>
+    <div>
+        <div class="tarjeta">
+            <h3>Entrega y pago</h3>
+            <p><strong>{{ pedido.get_tipo_entrega_display }}</strong><br>{{ pedido.direccion_entrega }}<br>Horario: {{ pedido.horario_entrega }}</p>
+            <p>Método de pago: {{ pedido.get_metodo_pago_display }}</p>
+            {% if pedido.repartidor %}<p>Repartidor: {{ pedido.repartidor }}</p>{% endif %}
+            <div class="acciones">
+                {% if pedido.estado == 'en_proceso' and pedido.metodo_pago != 'contra_entrega' %}
+                    <a href="{% url 'pagos:pagar' pedido.pk %}" class="btn">Pagar ahora</a>
+                {% endif %}
+                {% if pedido.esta_activo and pedido.estado != 'enviado' %}
+                    <form method="post" action="{% url 'pedidos:cancelar' pedido.pk %}" onsubmit="return confirm('¿Cancelar el pedido #{{ pedido.id }}?');">
+                        {% csrf_token %}<button class="btn-peligro">Cancelar pedido</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        <div class="tarjeta">
+            <h3>Seguimiento</h3>
+            <ul class="linea-tiempo">
+                {% for h in pedido.obtener_historial_estados %}
+                    <li><strong>{{ h.get_estado_display }}</strong><br><small>{{ h.fecha|date:"d/m/Y H:i" }}{% if h.comentario %} · {{ h.comentario }}{% endif %}</small></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

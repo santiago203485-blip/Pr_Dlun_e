@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block titulo %}Dirección{% endblock %}
+{% block contenido %}
+<div class="tarjeta formulario">
+    <h1>{% if direccion %}Editar dirección{% else %}Nueva dirección{% endif %}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar</button>
+        <a href="{% url 'domicilios:direcciones' %}" class="btn btn-secundario">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block titulo %}Categorías{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>Categorías</h1>
+    <a href="{% url 'catalogo:categoria_nueva' %}" class="btn">+ Nueva categoría</a>
+</div>
+<form method="get" class="filtros">
+    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar categoría">
+    <button type="submit">Buscar</button>
+</form>
+<table>
+    <thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th><th class="numero">Productos</th><th></th></tr></thead>
+    <tbody>
+    {% for c in categorias %}
+        <tr>
+            <td>{{ c.id }}</td><td>{{ c.nombre }}</td><td>{{ c.descripcion|truncatechars:60 }}</td>
+            <td class="numero">{{ c.total_productos }}</td>
+            <td class="acciones">
+                <a href="{% url 'catalogo:categoria_editar' c.pk %}" class="btn btn-pequeno btn-secundario">Editar</a>
+                <form method="post" action="{% url 'catalogo:categoria_eliminar' c.pk %}" onsubmit="return confirm('¿Eliminar la categoría {{ c.nombre }}?');">
+                    {% csrf_token %}<button class="btn-pequeno btn-peligro">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="5" class="centrado texto-gris">No hay categorías.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Diseños personalizados{% endblock %}
+{% block contenido %}
+<h1>Solicitudes de diseño</h1>
+<div class="categorias-chips">
+    <a class="chip" href="{% url 'personalizacion:gestion' %}">Todos</a>
+    {% for valor, nombre in estados %}<a class="chip" href="?estado={{ valor }}">{{ nombre }}</a>{% endfor %}
+</div>
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Descripción</th><th>Talla/Color</th><th class="numero">Cotización</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    {% for d in disenos %}
+        <tr>
+            <td>{{ d.id }}</td><td>{{ d.fecha|date:"d/m/Y" }}</td><td>{{ d.cliente.nombre }}</td>
+            <td>{{ d.descripcion|truncatechars:50 }}</td><td>{{ d.talla }} / {{ d.color }}</td>
+            <td class="numero">{{ d.precio_cotizado|pesos|default:"—" }}</td>
+            <td><span class="etiqueta {{ d.estado }}">{{ d.get_estado_display }}</span></td>
+            <td><a href="{% url 'personalizacion:gestion_detalle' d.pk %}" class="btn btn-pequeno btn-secundario">Responder</a></td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="8" class="centrado texto-gris">Sin solicitudes.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block titulo %}Historial de inventario{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>Movimientos de inventario</h1>
+    <a href="{% url 'inventario:lista' %}" class="btn btn-secundario">← Inventario</a>
+</div>
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th class="numero">Cantidad</th><th>Motivo</th><th>Usuario</th></tr></thead>
+    <tbody>
+    {% for m in movimientos %}
+        <tr>
+            <td>{{ m.fecha|date:"d/m/Y H:i" }}</td><td>{{ m.producto.nombre }}</td>
+            <td><span class="etiqueta {% if m.tipo == 'entrada' %}ok{% else %}alerta{% endif %}">{{ m.get_tipo_display }}</span></td>
+            <td class="numero">{{ m.cantidad }}</td><td>{{ m.motivo }}</td><td>{{ m.usuario|default:"Sistema" }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="6" class="centrado texto-gris">Sin movimientos.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

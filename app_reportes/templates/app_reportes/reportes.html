@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Reportes{% endblock %}
+{% block contenido %}
+<h1>📊 Reportes</h1>
+<form method="get" class="filtros tarjeta">
+    <div><label for="desde">Desde</label><input type="date" id="desde" name="desde" value="{{ desde|date:'Y-m-d' }}"></div>
+    <div><label for="hasta">Hasta</label><input type="date" id="hasta" name="hasta" value="{{ hasta|date:'Y-m-d' }}"></div>
+    <button type="submit">Generar</button>
+</form>
+
+<div class="estadisticas">
+    <div class="estadistica"><div class="valor">{{ total_general|pesos }}</div><div class="etiqueta">Ingresos totales</div></div>
+    <div class="estadistica"><div class="valor">{{ total_tienda|pesos }}</div><div class="etiqueta">Tienda ({{ num_ventas }} ventas)</div></div>
+    <div class="estadistica"><div class="valor">{{ total_online|pesos }}</div><div class="etiqueta">En línea ({{ num_pedidos }} pedidos)</div></div>
+</div>
+
+<div class="grid-2">
+    <div class="tarjeta">
+        <div class="cabecera"><h3 style="margin:0">Productos más vendidos</h3><a href="{% url 'reportes:exportar' 'productos' %}?desde={{ desde|date:'Y-m-d' }}&hasta={{ hasta|date:'Y-m-d' }}" class="btn btn-pequeno btn-secundario">⬇ Excel</a></div>
+        <table>
+            <thead><tr><th>Producto</th><th class="numero">Vendidos</th><th class="numero">Stock</th></tr></thead>
+            {% for p in top_productos %}<tr><td>{{ p.nombre }}</td><td class="numero">{{ p.veces_vendido }}</td><td class="numero">{{ p.stock }}</td></tr>
+            {% empty %}<tr><td colspan="3" class="texto-gris">Sin datos.</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="tarjeta">
+        <div class="cabecera"><h3 style="margin:0">Stock bajo</h3><a href="{% url 'reportes:exportar' 'inventario' %}" class="btn btn-pequeno btn-secundario">⬇ Excel</a></div>
+        <table>
+            <thead><tr><th>Producto</th><th class="numero">Stock</th><th class="numero">Mínimo</th></tr></thead>
+            {% for p in stock_bajo %}<tr class="{% if p.agotado %}agotado{% else %}stock-bajo{% endif %}"><td>{{ p.nombre }}</td><td class="numero">{{ p.stock }}</td><td class="numero">{{ p.stock_minimo }}</td></tr>
+            {% empty %}<tr><td colspan="3" class="texto-gris">Todo el inventario está bien. 👍</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="tarjeta">
+        <h3>Mejores clientes</h3>
+        <table>
+            <thead><tr><th>Cliente</th><th class="numero">Compras</th><th class="numero">Total</th></tr></thead>
+            {% for c in mejores_clientes %}<tr><td>{{ c.nombre }}{% if c.es_vip %} <span class="etiqueta vip">VIP</span>{% endif %}</td><td class="numero">{{ c.total_compras }}</td><td class="numero">{{ c.total_gastado|pesos }}</td></tr>
+            {% empty %}<tr><td colspan="3" class="texto-gris">Sin datos.</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="tarjeta">
+        <div class="cabecera"><h3 style="margin:0">Clientes inactivos ({{ inactivos|length }})</h3><a href="{% url 'reportes:exportar' 'inactivos' %}" class="btn btn-pequeno btn-secundario">⬇ Excel</a></div>
+        <table>
+            {% for c in inactivos|slice:":10" %}<tr><td>{{ c.nombre }}</td><td>{{ c.telefono }}</td><td>{{ c.ultima_compra|date:"d/m/Y"|default:"Nunca compró" }}</td></tr>
+            {% empty %}<tr><td class="texto-gris">Sin clientes inactivos.</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+
+<div class="tarjeta">
+    <div class="cabecera"><h3 style="margin:0">Ventas en tienda por método de pago</h3><a href="{% url 'reportes:exportar' 'ventas' %}?desde={{ desde|date:'Y-m-d' }}&hasta={{ hasta|date:'Y-m-d' }}" class="btn btn-pequeno btn-secundario">⬇ Excel (detalle de ventas)</a></div>
+    <table>
+        <thead><tr><th>Método</th><th class="numero">Ventas</th><th class="numero">Total</th></tr></thead>
+        {% for m in por_metodo %}<tr><td>{{ m.metodo_pago|capfirst }}</td><td class="numero">{{ m.n }}</td><td class="numero">{{ m.t|pesos }}</td></tr>
+        {% empty %}<tr><td colspan="3" class="texto-gris">Sin ventas en el rango.</td></tr>{% endfor %}
+    </table>
+</div>
+{% endblock %}

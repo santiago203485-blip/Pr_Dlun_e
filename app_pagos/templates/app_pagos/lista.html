@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Pagos{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>Pagos</h1>
+    {% if user.es_admin %}<a href="{% url 'pagos:cupones' %}" class="btn btn-secundario">Cupones</a>{% endif %}
+</div>
+<div class="categorias-chips">
+    <a class="chip" href="{% url 'pagos:lista' %}">Todos</a>
+    {% for valor, nombre in estados %}<a class="chip" href="?estado={{ valor }}">{{ nombre }}</a>{% endfor %}
+</div>
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th>ID</th><th>Fecha</th><th>Pedido</th><th>Cliente</th><th>Método</th><th class="numero">Monto</th><th>Estado</th><th>Referencia</th></tr></thead>
+    <tbody>
+    {% for p in pagos %}
+        <tr>
+            <td>{{ p.id }}</td><td>{{ p.fecha_transaccion|date:"d/m/Y H:i"|default:"—" }}</td>
+            <td><a href="{% url 'pedidos:gestion_detalle' p.pedido.pk %}">#{{ p.pedido.id }}</a></td>
+            <td>{{ p.pedido.cliente.nombre }}</td><td>{{ p.get_metodo_display }}</td>
+            <td class="numero">{{ p.monto|pesos }}</td>
+            <td><span class="etiqueta {{ p.estado }}">{{ p.get_estado_display }}</span>{% if p.motivo_rechazo %}<br><small class="texto-gris">{{ p.motivo_rechazo }}</small>{% endif %}</td>
+            <td><small>{{ p.id_transaccion_externo|default:"—" }}</small></td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="8" class="centrado texto-gris">Sin pagos.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

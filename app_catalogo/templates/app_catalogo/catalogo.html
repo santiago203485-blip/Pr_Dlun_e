@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block titulo %}Catálogo{% endblock %}
+{% block contenido %}
+<h1>Catálogo de pijamas</h1>
+<form method="get" class="filtros tarjeta">
+    <div><label for="q">Buscar</label><input type="search" id="q" name="q" value="{{ request.GET.q }}" placeholder="Nombre o código..."></div>
+    <div>
+        <label for="genero">Para</label>
+        <select id="genero" name="genero">
+            <option value="">Todos</option>
+            {% for valor, nombre in generos %}<option value="{{ valor }}" {% if request.GET.genero == valor %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+        </select>
+    </div>
+    <div>
+        <label for="categoria">Categoría</label>
+        <select id="categoria" name="categoria">
+            <option value="">Todas</option>
+            {% for c in categorias %}<option value="{{ c.id }}" {% if request.GET.categoria == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+        </select>
+    </div>
+    <button type="submit">Filtrar</button>
+    <a href="{% url 'catalogo:catalogo' %}" class="btn btn-secundario">Limpiar</a>
+</form>
+
+<p class="texto-gris">{{ productos|length }} producto(s)</p>
+<div class="grid">
+    {% for p in productos %}{% include 'includes/tarjeta_producto.html' %}{% empty %}<p>No encontramos pijamas con esos filtros.</p>{% endfor %}
+</div>
+{% endblock %}

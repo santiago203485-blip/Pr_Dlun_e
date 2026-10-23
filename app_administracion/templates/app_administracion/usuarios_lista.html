@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block titulo %}Usuarios{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>Usuarios del sistema</h1>
+    <a href="{% url 'administracion:usuario_nuevo' %}" class="btn">+ Agregar usuario</a>
+</div>
+<form method="get" class="filtros">
+    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nombre, usuario o rol">
+    <button type="submit">Buscar</button>
+</form>
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th>ID</th><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Último acceso</th><th></th></tr></thead>
+    <tbody>
+    {% for u in usuarios %}
+        <tr>
+            <td>{{ u.id }}</td><td>{{ u.get_full_name|default:"—" }}</td><td>{{ u.username }}</td><td>{{ u.get_rol_display }}</td>
+            <td>{% if u.is_active %}<span class="etiqueta ok">Activo</span>{% else %}<span class="etiqueta error">Inactivo</span>{% endif %}</td>
+            <td>{{ u.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</td>
+            <td class="acciones">
+                <a href="{% url 'administracion:usuario_editar' u.pk %}" class="btn btn-pequeno btn-secundario">Editar</a>
+                <form method="post" action="{% url 'administracion:usuario_alternar' u.pk %}">{% csrf_token %}<button class="btn-pequeno btn-secundario">{% if u.is_active %}Desactivar{% else %}Activar{% endif %}</button></form>
+                <form method="post" action="{% url 'administracion:usuario_eliminar' u.pk %}" onsubmit="return confirm('¿Eliminar permanentemente a {{ u }}?');">{% csrf_token %}<button class="btn-pequeno btn-peligro">Eliminar</button></form>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="7" class="centrado texto-gris">Sin usuarios.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

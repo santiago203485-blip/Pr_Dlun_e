@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block titulo %}Registrarse{% endblock %}
+{% block contenido %}
+<div class="tarjeta formulario" style="margin:0 auto">
+    <h1>Crear cuenta</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Registrarme</button>
+    </form>
+    <p style="margin-top:15px">¿Ya tienes cuenta? <a href="{% url 'usuarios:login' %}">Inicia sesión</a></p>
+</div>
+{% endblock %}

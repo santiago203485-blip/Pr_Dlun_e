@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block titulo %}Configuración{% endblock %}
+{% block contenido %}
+<div class="tarjeta formulario">
+    <h1>⚙️ Configuración de la tienda</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar</button>
+    </form>
+</div>
+{% endblock %}

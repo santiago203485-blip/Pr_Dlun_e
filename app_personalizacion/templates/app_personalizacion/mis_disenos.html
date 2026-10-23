@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Mis diseños{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>🎨 Pijamas personalizadas</h1>
+    <a href="{% url 'personalizacion:nuevo' %}" class="btn">+ Solicitar diseño</a>
+</div>
+<div class="grid-2">
+{% for d in disenos %}
+    <div class="tarjeta">
+        <div class="cabecera">
+            <h3 style="margin:0">Diseño #{{ d.id }}</h3>
+            <span class="etiqueta {{ d.estado }}">{{ d.get_estado_display }}</span>
+        </div>
+        <p>{{ d.descripcion|linebreaksbr }}</p>
+        <p class="texto-gris">Talla {{ d.talla }} · {{ d.color }} · {{ d.cantidad }} und{% if d.producto_base %} · Base: {{ d.producto_base.nombre }}{% endif %}</p>
+        {% if d.imagen_referencia %}<p><a href="{{ d.imagen_referencia.url }}" target="_blank">Ver imagen de referencia</a></p>{% endif %}
+        {% if d.respuesta_tienda %}<p><strong>Respuesta de la tienda:</strong> {{ d.respuesta_tienda }}</p>{% endif %}
+        {% if d.precio_cotizado %}<p class="precio">{{ d.precio_cotizado|pesos }}</p>{% endif %}
+        {% if d.estado == 'cotizado' %}
+            <form method="post" action="{% url 'personalizacion:responder' d.pk %}" class="acciones">
+                {% csrf_token %}
+                <button name="accion" value="aceptar" class="btn-exito">Aceptar cotización</button>
+                <button name="accion" value="rechazar" class="btn-secundario">Rechazar</button>
+            </form>
+        {% endif %}
+    </div>
+{% empty %}
+    <p class="texto-gris">Aún no has solicitado diseños. ¡Cuéntanos qué estampado quieres!</p>
+{% endfor %}
+</div>
+{% endblock %}

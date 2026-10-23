@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block titulo %}Usuario{% endblock %}
+{% block contenido %}
+<div class="tarjeta formulario">
+    <h1>{% if usuario_editado %}Editar usuario{% else %}Nuevo usuario{% endif %}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar</button>
+        <a href="{% url 'administracion:usuarios' %}" class="btn btn-secundario">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

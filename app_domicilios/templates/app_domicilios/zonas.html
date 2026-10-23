@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Zonas de domicilio{% endblock %}
+{% block contenido %}
+<h1>Zonas de cobertura de domicilio</h1>
+<p class="texto-gris">Si no hay zonas registradas, se acepta cualquier dirección con el costo base de la configuración.</p>
+<div class="grid-2">
+    <div class="tarjeta">
+        <h3>Agregar zona</h3>
+        <form method="post">{% csrf_token %}{{ form.as_p }}<button type="submit">Agregar</button></form>
+    </div>
+    <div class="tarjeta tabla-contenedor">
+        <table>
+            <thead><tr><th>Ciudad</th><th>Barrio</th><th class="numero">Costo</th><th>Activa</th><th></th></tr></thead>
+            <tbody>
+            {% for z in zonas %}
+                <tr>
+                    <td>{{ z.ciudad }}</td><td>{{ z.barrio|default:"Toda la ciudad" }}</td><td class="numero">{{ z.costo|pesos }}</td>
+                    <td>{{ z.activa|yesno:"Sí,No" }}</td>
+                    <td><form method="post" action="{% url 'domicilios:zona_eliminar' z.pk %}">{% csrf_token %}<button class="btn-pequeno btn-peligro">✕</button></form></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" class="centrado texto-gris">Sin zonas registradas.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

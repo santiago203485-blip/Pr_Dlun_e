@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Pedido #{{ pedido.id }}{% endblock %}
+{% block contenido %}
+<p><a href="{% url 'pedidos:gestion' %}">← Pedidos</a></p>
+<div class="cabecera">
+    <h1>Pedido #{{ pedido.id }}</h1>
+    <span class="etiqueta {{ pedido.estado }}" style="font-size:1rem">{{ pedido.get_estado_display }}</span>
+</div>
+
+<div class="grid-2">
+    <div>
+        <div class="tarjeta">
+            <h3>Cliente</h3>
+            <p><a href="{% url 'clientes:detalle' pedido.cliente.pk %}">{{ pedido.cliente.nombre }}</a>{% if pedido.cliente.es_vip %} <span class="etiqueta vip">VIP</span>{% endif %}<br>
+               📞 {{ pedido.cliente.telefono }} · ✉️ {{ pedido.cliente.email }}</p>
+            <p><strong>{{ pedido.get_tipo_entrega_display }}:</strong> {{ pedido.direccion_entrega }}<br>Horario: {{ pedido.horario_entrega }}<br>Pago: {{ pedido.get_metodo_pago_display }}</p>
+        </div>
+        <div class="tarjeta">
+            <h3>Productos</h3>
+            {% include 'includes/resumen_pedido.html' %}
+        </div>
+        <div class="tarjeta">
+            <h3>Pagos</h3>
+            {% for pago in pedido.pagos.all %}
+                <p>{{ pago.get_metodo_display }} · {{ pago.monto|pesos }} · <span class="etiqueta {{ pago.estado }}">{{ pago.get_estado_display }}</span>
+                   {% if pago.id_transaccion_externo %}<small class="texto-gris">Ref. {{ pago.id_transaccion_externo }}</small>{% endif %}
+                   {% if pago.comprobante %}<a href="{{ pago.comprobante.url }}" target="_blank">Ver comprobante</a>{% endif %}</p>
+            {% empty %}<p class="texto-gris">Sin pagos registrados.</p>{% endfor %}
+        </div>
+    </div>
+
+    <div>
+        {% if form_estado.fields.estado.choices %}
+        <div class="tarjeta">
+            <h3>Cambiar estado</h3>
+            <form method="post">{% csrf_token %}{{ form_estado.as_p }}<button name="cambiar_estado">Actualizar estado</button></form>
+        </div>
+        {% endif %}
+        {% if pedido.tipo_entrega == 'domicilio' and pedido.esta_activo %}
+        <div class="tarjeta">
+            <h3>Repartidor</h3>
+            <form method="post">{% csrf_token %}{{ form_repartidor.as_p }}<button name="asignar_repartidor">Asignar</button></form>
+        </div>
+        {% endif %}
+        <div class="tarjeta">
+            <h3>Notas internas</h3>
+            <form method="post">
+                {% csrf_token %}
+                <textarea name="notas_internas" rows="3">{{ pedido.notas_internas }}</textarea>
+                <button name="notas" style="margin-top:8px">Guardar notas</button>
+            </form>
+        </div>
+        <div class="tarjeta">
+            <h3>Historial</h3>
+            <ul class="linea-tiempo">
+                {% for h in pedido.obtener_historial_estados %}
+                    <li><strong>{{ h.get_estado_display }}</strong><br><small>{{ h.fecha|date:"d/m/Y H:i" }} · {{ h.usuario|default:"Sistema" }}{% if h.comentario %} · {{ h.comentario }}{% endif %}</small></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

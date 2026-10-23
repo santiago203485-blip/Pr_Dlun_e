@@ -1,0 +1,18 @@
+{% load dlune %}
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th>Producto</th><th>Talla</th><th>Color</th><th class="numero">Cant.</th><th class="numero">Precio</th><th class="numero">Subtotal</th></tr></thead>
+    <tbody>
+    {% for d in pedido.detalles.all %}
+        <tr><td>{{ d.producto.nombre }}</td><td>{{ d.talla }}</td><td>{{ d.color }}</td><td class="numero">{{ d.cantidad }}</td><td class="numero">{{ d.precio_unitario|pesos }}</td><td class="numero">{{ d.subtotal|pesos }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+<table class="resumen" style="max-width:320px;margin-left:auto;margin-top:10px">
+    <tr><td>Subtotal</td><td class="numero">{{ pedido.subtotal|pesos }}</td></tr>
+    {% if pedido.descuento %}<tr><td>Descuento ({{ pedido.cupon }})</td><td class="numero">-{{ pedido.descuento|pesos }}</td></tr>{% endif %}
+    <tr><td>Impuesto</td><td class="numero">{{ pedido.impuesto|pesos }}</td></tr>
+    <tr><td>Domicilio</td><td class="numero">{{ pedido.costo_domicilio|pesos }}</td></tr>
+    <tr class="total"><td>Total</td><td class="numero">{{ pedido.total|pesos }}</td></tr>
+</table>

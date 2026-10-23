@@ -1,0 +1,63 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Dlune{% endblock %} | Dlune Pijamas</title>
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+</head>
+<body>
+<header class="navbar">
+    <a href="{% url 'inicio:inicio' %}" class="logo">D<span>lune</span> 🌙</a>
+    <nav>
+        <a href="{% url 'catalogo:catalogo' %}">Catálogo</a>
+        {% if user.is_authenticated %}
+            {% if user.es_admin %}
+                <a href="{% url 'administracion:dashboard' %}">Panel</a>
+                <a href="{% url 'catalogo:productos' %}">Productos</a>
+                <a href="{% url 'inventario:lista' %}">Inventario</a>
+                <a href="{% url 'ventas:lista' %}">Ventas</a>
+                <a href="{% url 'pedidos:gestion' %}">Pedidos</a>
+                <a href="{% url 'clientes:lista' %}">Clientes</a>
+                <a href="{% url 'reportes:reportes' %}">Reportes</a>
+            {% elif user.rol == 'vendedor' %}
+                <a href="{% url 'ventas:nueva' %}">Nueva venta</a>
+                <a href="{% url 'ventas:lista' %}">Mis ventas</a>
+                <a href="{% url 'pedidos:gestion' %}">Pedidos</a>
+                <a href="{% url 'clientes:lista' %}">Clientes</a>
+                <a href="{% url 'personalizacion:gestion' %}">Diseños</a>
+            {% elif user.rol == 'bodega' %}
+                <a href="{% url 'inventario:lista' %}">Inventario</a>
+                <a href="{% url 'catalogo:productos' %}">Productos</a>
+                <a href="{% url 'inventario:historial' %}">Movimientos</a>
+            {% elif user.es_repartidor %}
+                <a href="{% url 'domicilios:entregas' %}">Mis entregas</a>
+            {% else %}
+                <a href="{% url 'pedidos:mis_pedidos' %}">Mis pedidos</a>
+                <a href="{% url 'personalizacion:mis_disenos' %}">Personalizar</a>
+                <a href="{% url 'carrito:ver' %}">🛒 Carrito <span class="badge-carrito">{{ carrito_cantidad }}</span></a>
+            {% endif %}
+            <a href="{% url 'usuarios:perfil' %}">👤 {{ user.first_name|default:user.username }}</a>
+            <form method="post" action="{% url 'usuarios:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="enlace" style="color:#fff;padding:8px 10px;">Salir</button>
+            </form>
+        {% else %}
+            <a href="{% url 'usuarios:login' %}">Iniciar sesión</a>
+            <a href="{% url 'usuarios:registro' %}">Registrarse</a>
+        {% endif %}
+    </nav>
+</header>
+
+<main class="contenedor">
+    {% if messages %}
+        <ul class="mensajes">
+            {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+        </ul>
+    {% endif %}
+    {% block contenido %}{% endblock %}
+</main>
+
+<footer class="pie">Dlune Pijamas &copy; {% now "Y" %} · Pijamas con estampados</footer>
+</body>
+</html>

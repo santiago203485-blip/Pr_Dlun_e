@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}{{ producto.nombre }}{% endblock %}
+{% block contenido %}
+<p><a href="{% url 'catalogo:catalogo' %}">← Volver al catálogo</a></p>
+<div class="detalle-producto tarjeta">
+    <div class="producto" style="border:none">
+        <div class="imagen">{% if producto.imagen %}<img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">{% else %}🌙{% endif %}</div>
+    </div>
+    <div>
+        <h1>{{ producto.nombre }}</h1>
+        <p class="texto-gris">{{ producto.categoria }} · {{ producto.get_genero_display }} · Código {{ producto.codigo }}</p>
+        <p class="precio">{{ producto.precio_venta|pesos }}</p>
+        <p>{{ producto.descripcion|linebreaksbr }}</p>
+
+        {% if producto.agotado %}
+            <p><span class="etiqueta error">Agotado</span></p>
+            {% if user.is_authenticated and user.es_cliente %}
+                <form method="post" action="{% url 'notificaciones:solicitar_stock' producto.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-secundario">🔔 Avísame cuando llegue</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <p><span class="etiqueta ok">Disponible</span> <small class="texto-gris">{{ producto.stock }} unidades</small></p>
+            {% if user.is_authenticated and not user.es_cliente %}
+                <p class="texto-gris">Inicia sesión como cliente para comprar.</p>
+            {% else %}
+                <form method="post" action="{% url 'carrito:agregar' producto.pk %}">
+                    {% csrf_token %}
+                    <div class="filtros">
+                        <div><label>Talla</label>{{ form.talla }}</div>
+                        <div><label>Color</label>{{ form.color }}</div>
+                        <div><label>Cantidad</label>{{ form.cantidad }}</div>
+                    </div>
+                    <button type="submit">🛒 Agregar al carrito</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% if relacionados %}
+<h2>También te puede gustar</h2>
+<div class="grid">{% for p in relacionados %}{% include 'includes/tarjeta_producto.html' %}{% endfor %}</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block titulo %}Inventario{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>Inventario</h1>
+    <div class="acciones">
+        <a href="{% url 'inventario:historial' %}" class="btn btn-secundario">Historial</a>
+        <a href="{% url 'inventario:movimiento' %}" class="btn">+ Registrar entrada/salida</a>
+    </div>
+</div>
+
+<div class="estadisticas">
+    <div class="estadistica"><div class="valor">{{ productos|length }}</div><div class="etiqueta">Productos mostrados</div></div>
+    <div class="estadistica" style="border-color:var(--alerta)"><div class="valor">{{ total_bajo }}</div><div class="etiqueta">Con stock bajo</div></div>
+    <div class="estadistica" style="border-color:var(--error)"><div class="valor">{{ total_agotados }}</div><div class="etiqueta">Agotados</div></div>
+</div>
+
+<p>
+    {% if request.GET.bajo %}<a href="{% url 'inventario:lista' %}">Ver todos</a>
+    {% else %}<a href="?bajo=1">⚠️ Ver solo productos por agotarse</a>{% endif %}
+</p>
+
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th class="numero">Stock</th><th class="numero">Mínimo</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    {% for p in productos %}
+        <tr class="{% if p.agotado %}agotado{% elif p.esta_en_stock_bajo %}stock-bajo{% endif %}">
+            <td>{{ p.codigo }}</td><td>{{ p.nombre }}</td><td>{{ p.categoria }}</td>
+            <td class="numero"><strong>{{ p.stock }}</strong></td><td class="numero">{{ p.stock_minimo }}</td>
+            <td>
+                {% if p.agotado %}<span class="etiqueta error">Agotado</span>
+                {% elif p.esta_en_stock_bajo %}<span class="etiqueta alerta">Stock bajo</span>
+                {% else %}<span class="etiqueta ok">OK</span>{% endif %}
+            </td>
+            <td><a href="{% url 'inventario:movimiento' %}?producto={{ p.pk }}" class="btn btn-pequeno btn-secundario">Ajustar</a></td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="7" class="centrado texto-gris">Sin productos.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

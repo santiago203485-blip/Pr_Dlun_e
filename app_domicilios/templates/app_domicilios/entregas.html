@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Entregas{% endblock %}
+{% block contenido %}
+<h1>🛵 Mis entregas</h1>
+<div class="grid-2">
+{% for p in activos %}
+    <div class="tarjeta">
+        <div class="cabecera">
+            <h3 style="margin:0">Pedido #{{ p.id }}</h3>
+            <span class="etiqueta {{ p.estado }}">{{ p.get_estado_display }}</span>
+        </div>
+        <p><strong>{{ p.cliente.nombre }}</strong> · 📞 {{ p.cliente.telefono }}</p>
+        <p>📍 {{ p.direccion_entrega }}<br>🕒 {{ p.horario_entrega }}</p>
+        <p>Total: <strong>{{ p.total|pesos }}</strong>
+            {% if p.metodo_pago == 'contra_entrega' %}<span class="etiqueta alerta">Cobrar al entregar</span>{% endif %}
+        </p>
+        {% if not p.repartidor %}<p class="texto-gris">Sin repartidor asignado.</p>{% endif %}
+        <form method="post" action="{% url 'domicilios:actualizar_entrega' p.pk %}">
+            {% csrf_token %}
+            <input type="text" name="comentario" placeholder="Comentario o incidencia (opcional)">
+            <div class="acciones" style="margin-top:8px">
+                {% if p.estado != 'enviado' %}<button name="estado" value="enviado">En camino</button>{% endif %}
+                {% if p.estado == 'enviado' %}
+                    <button name="estado" value="entregado" class="btn-exito">Entregado</button>
+                    {% if p.metodo_pago == 'contra_entrega' %}<button name="estado" value="cancelado" class="btn-peligro">No pagó</button>{% endif %}
+                {% endif %}
+            </div>
+        </form>
+    </div>
+{% empty %}
+    <p class="texto-gris">No tienes entregas pendientes. 🎉</p>
+{% endfor %}
+</div>
+
+{% if entregados %}
+<h2>Entregados recientemente</h2>
+<table>
+    <thead><tr><th>Pedido</th><th>Cliente</th><th>Dirección</th><th class="numero">Total</th></tr></thead>
+    <tbody>{% for p in entregados %}<tr><td>#{{ p.id }}</td><td>{{ p.cliente.nombre }}</td><td>{{ p.direccion_entrega }}</td><td class="numero">{{ p.total|pesos }}</td></tr>{% endfor %}</tbody>
+</table>
+{% endif %}
+{% endblock %}

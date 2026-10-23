@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Productos{% endblock %}
+{% block contenido %}
+<div class="cabecera">
+    <h1>Gestión de productos</h1>
+    <div class="acciones">
+        {% if user.es_admin %}<a href="{% url 'catalogo:categorias' %}" class="btn btn-secundario">Categorías</a>{% endif %}
+        <a href="{% url 'catalogo:producto_nuevo' %}" class="btn">+ Agregar producto</a>
+    </div>
+</div>
+
+<form method="get" class="filtros">
+    <input type="search" name="q" value="{{ request.GET.q }}" placeholder="Buscar por nombre o código">
+    <select name="categoria">
+        <option value="">Todas las categorías</option>
+        {% for c in categorias %}<option value="{{ c.id }}" {% if request.GET.categoria == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>{% endfor %}
+    </select>
+    <button type="submit">Buscar</button>
+</form>
+
+<div class="tabla-contenedor">
+<table>
+    <thead><tr><th></th><th>Código</th><th>Nombre</th><th>Categoría</th><th class="numero">Stock</th><th class="numero">P. compra</th><th class="numero">P. venta</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+    {% for p in productos %}
+        <tr class="{% if p.agotado %}agotado{% elif p.esta_en_stock_bajo %}stock-bajo{% endif %}">
+            <td>{% if p.imagen %}<img src="{{ p.imagen.url }}" class="miniatura" alt="">{% else %}🌙{% endif %}</td>
+            <td>{{ p.codigo }}</td>
+            <td>{{ p.nombre }}</td>
+            <td>{{ p.categoria }}</td>
+            <td class="numero">{% if p.esta_en_stock_bajo %}⚠️ {% endif %}{{ p.stock }}</td>
+            <td class="numero">{{ p.precio_compra|pesos }}</td>
+            <td class="numero">{{ p.precio_venta|pesos }}</td>
+            <td>{% if p.visible %}<span class="etiqueta ok">Visible</span>{% else %}<span class="etiqueta">Oculto</span>{% endif %}</td>
+            <td class="acciones">
+                <a href="{% url 'catalogo:producto_editar' p.pk %}" class="btn btn-pequeno btn-secundario">Editar</a>
+                <form method="post" action="{% url 'catalogo:producto_eliminar' p.pk %}" onsubmit="return confirm('¿Eliminar {{ p.nombre }}?');">
+                    {% csrf_token %}<button class="btn-pequeno btn-peligro">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="9" class="centrado texto-gris">No hay productos.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

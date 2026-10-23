@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}Confirmar pedido{% endblock %}
+{% block contenido %}
+<h1>Confirmar pedido</h1>
+<form method="post">
+    {% csrf_token %}
+    <div class="grid-2">
+        <div class="tarjeta">
+            {{ form.non_field_errors }}
+            <h3>1. Entrega</h3>
+            <p>{{ form.tipo_entrega.errors }}{{ form.tipo_entrega }}</p>
+            <p>
+                <label for="{{ form.direccion.id_for_label }}">{{ form.direccion.label }}</label>
+                {{ form.direccion.errors }}{{ form.direccion }}
+                <a href="{% url 'domicilios:direccion_nueva' %}?next={% url 'pedidos:checkout' %}" class="ayuda">+ Agregar nueva dirección</a>
+            </p>
+            <p><label for="{{ form.horario_entrega.id_for_label }}">{{ form.horario_entrega.label }}</label>{{ form.horario_entrega }}</p>
+
+            <h3>2. Pago</h3>
+            <p>{{ form.metodo_pago.errors }}{{ form.metodo_pago }}</p>
+            <p><label for="{{ form.cupon.id_for_label }}">{{ form.cupon.label }}</label>{{ form.cupon }}</p>
+        </div>
+
+        <div class="tarjeta">
+            <h3>Tu pedido</h3>
+            <table>
+                {% for item in items %}
+                    <tr><td>{{ item.cantidad }} × {{ item.producto.nombre }} <small class="texto-gris">({{ item.talla }}, {{ item.color }})</small></td><td class="numero">{{ item.subtotal|pesos }}</td></tr>
+                {% endfor %}
+            </table>
+            <table class="resumen" style="margin-top:10px">
+                <tr class="total"><td>Subtotal</td><td class="numero">{{ subtotal|pesos }}</td></tr>
+            </table>
+            <p class="ayuda">Al confirmar se suman el costo del domicilio según tu zona y los impuestos.</p>
+            <button type="submit" style="width:100%">Confirmar y continuar</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

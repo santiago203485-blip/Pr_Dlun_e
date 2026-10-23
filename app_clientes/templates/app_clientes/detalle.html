@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}{{ cliente.nombre }}{% endblock %}
+{% block contenido %}
+<p><a href="{% url 'clientes:lista' %}">← Clientes</a></p>
+<h1>{{ cliente.nombre }} {% if cliente.es_vip %}<span class="etiqueta vip">⭐ VIP</span>{% endif %}</h1>
+<div class="estadisticas">
+    <div class="estadistica"><div class="valor">{{ cliente.total_compras }}</div><div class="etiqueta">Compras</div></div>
+    <div class="estadistica"><div class="valor">{{ cliente.total_gastado|pesos }}</div><div class="etiqueta">Total gastado</div></div>
+    <div class="estadistica"><div class="valor">{{ cliente.visitas }}</div><div class="etiqueta">Visitas</div></div>
+    <div class="estadistica"><div class="valor">{{ cliente.dias_inactivo|default_if_none:"—" }}</div><div class="etiqueta">Días sin comprar</div></div>
+</div>
+<div class="tarjeta">
+    <p>✉️ {{ cliente.email }} · 📞 {{ cliente.telefono }} · Registrado el {{ cliente.fecha_registro }}
+       · WhatsApp: {{ cliente.notificaciones_whatsapp|yesno:"Acepta,No acepta" }}</p>
+</div>
+<div class="grid-2">
+    <div class="tarjeta">
+        <h3>Últimos pedidos en línea</h3>
+        <table>
+            {% for p in pedidos %}
+                <tr><td><a href="{% url 'pedidos:gestion_detalle' p.pk %}">#{{ p.id }}</a></td><td>{{ p.fecha|date:"d/m/Y" }}</td><td class="numero">{{ p.total|pesos }}</td><td><span class="etiqueta {{ p.estado }}">{{ p.get_estado_display }}</span></td></tr>
+            {% empty %}<tr><td class="texto-gris">Sin pedidos.</td></tr>{% endfor %}
+        </table>
+    </div>
+    <div class="tarjeta">
+        <h3>Compras en tienda</h3>
+        <table>
+            {% for v in ventas %}
+                <tr><td><a href="{% url 'ventas:factura' v.pk %}">#{{ v.id }}</a></td><td>{{ v.fecha|date:"d/m/Y" }}</td><td class="numero">{{ v.total|pesos }}</td></tr>
+            {% empty %}<tr><td class="texto-gris">Sin compras en tienda.</td></tr>{% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

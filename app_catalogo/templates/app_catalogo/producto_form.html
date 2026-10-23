@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load dlune %}
+{% block titulo %}{% if producto %}Editar{% else %}Nuevo{% endif %} producto{% endblock %}
+{% block contenido %}
+<div class="tarjeta formulario">
+    <h1>{% if producto %}Editar "{{ producto.nombre }}"{% else %}Nuevo producto{% endif %}</h1>
+    {% if producto %}<p class="texto-gris">Precio de venta actual: <strong>{{ producto.precio_venta|pesos }}</strong></p>{% endif %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <p class="ayuda">El precio de venta se calcula automáticamente: precio de compra × (1 + % ganancia).</p>
+        <button type="submit">Guardar</button>
+        <a href="{% url 'catalogo:productos' %}" class="btn btn-secundario">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

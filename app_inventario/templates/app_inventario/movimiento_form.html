@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block titulo %}Movimiento de inventario{% endblock %}
+{% block contenido %}
+<div class="tarjeta formulario">
+    <h1>Registrar movimiento</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Registrar</button>
+        <a href="{% url 'inventario:lista' %}" class="btn btn-secundario">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
