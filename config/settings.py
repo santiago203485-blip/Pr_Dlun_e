@@ -10,22 +10,34 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
+def env_lista(nombre, defecto=''):
+    """Lee una variable de entorno separada por comas."""
+    return [v.strip() for v in os.environ.get(nombre, defecto).split(',') if v.strip()]
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-a$drwek8o5bo)!0d1!t@$97v5m4v$uxhi@86@*)2xg*@u!a*+v'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# En producción todo se configura con variables de entorno (ver .env.example y DESPLIEGUE.md)
+SECRET_KEY = os.environ.get(
+    'SECRET_KEY', 'django-insecure-a$drwek8o5bo)!0d1!t@$97v5m4v$uxhi@86@*)2xg*@u!a*+v'
+)
 
-ALLOWED_HOSTS = []
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('1', 'true', 'si', 'yes')
+
+ALLOWED_HOSTS = env_lista('ALLOWED_HOSTS', 'localhost,127.0.0.1')
+if os.environ.get('RENDER_EXTERNAL_HOSTNAME'):
+    ALLOWED_HOSTS.append(os.environ['RENDER_EXTERNAL_HOSTNAME'])
+
+CSRF_TRUSTED_ORIGINS = env_lista('CSRF_TRUSTED_ORIGINS') + [
+    f'https://{h}' for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1')
+]
 
 
 # Application definition
@@ -57,6 +69,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -89,11 +102,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+# SQLite por defecto; en el host se puede usar PostgreSQL con la variable DATABASE_URL
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}', conn_max_age=600
+    )
 }
 
 
@@ -133,10 +146,29 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# WhiteNoise sirve los estáticos en producción (comprimidos y con nombre versionado)
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage' if DEBUG
+        else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    },
+}
 
 # Archivos subidos (imágenes de productos, fotos de usuario)
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+# En hosts sin servidor de archivos propio, Django sirve /media/ (suficiente para un prototipo)
+SERVE_MEDIA = os.environ.get('SERVE_MEDIA', 'True').lower() in ('1', 'true', 'si', 'yes')
+
+# Seguridad en producción (DEBUG=False)
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'True').lower() in ('1', 'true', 'si', 'yes')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Usuario personalizado y rutas de autenticación
 AUTH_USER_MODEL = 'app_usuarios.Usuario'

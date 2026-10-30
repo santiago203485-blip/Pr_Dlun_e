@@ -1,0 +1,73 @@
+@startuml Diagrama_De_Secuencia_Dlune
+' Compra y pago de un pedido. Los mensajes usan los métodos del diagrama de clases.
+title Interacción: compra de una pijama
+autonumber
+
+actor Cliente
+participant "App\n(Plantillas Django)" as App
+participant "Sistema\n(Vistas Django)" as Sistema
+database "BD" as BD
+participant "Sistema de pago" as Pasarela
+participant "API de WhatsApp" as WhatsApp
+
+Cliente -> App : Ingresar datos (Usuario, Contrasena)
+activate App
+App -> Sistema : Iniciar_Sesion(Usuario, Contrasena)
+activate Sistema
+Sistema -> BD : Consultar usuario
+BD --> Sistema : Datos correctos
+Sistema --> App : Login exitoso
+deactivate Sistema
+App --> Cliente : Mostrar catálogo
+
+Cliente -> App : Buscar o filtrar pijama
+App -> Sistema : Cargar opciones (texto, género, categoría)
+activate Sistema
+Sistema -> BD : Consultar productos visibles
+BD --> Sistema : List<Producto>
+Sistema --> App : Productos filtrados
+deactivate Sistema
+
+Cliente -> App : Seleccionar pijama (talla, color, cantidad)
+App -> Sistema : Agregar_Producto(Producto, Cantidad, Talla, Color)
+activate Sistema
+Sistema -> BD : Guardar Item_Carrito
+Sistema --> App : Carrito actualizado
+deactivate Sistema
+
+Cliente -> App : Confirmar pedido (entrega, horario, método de pago, cupón)
+App -> Sistema : Crear pedido
+activate Sistema
+Sistema -> Sistema : Validar_Cobertura() y validar stock
+Sistema -> BD : Guardar Pedido y Detalle_Pedido
+Sistema -> BD : Registrar Movimiento_Inventario (salida)
+Sistema -> Sistema : Calcular_Total() y Aplicar_Cupon(Codigo)
+Sistema -> BD : Cambiar_Estado(En_Proceso)
+Sistema -> WhatsApp : Enviar(Cliente, Confirmacion_Pedido, Contenido)
+Sistema --> App : Mostrar pantalla de pago
+deactivate Sistema
+
+loop Hasta que el pago sea aprobado
+  Cliente -> App : Procesar pago
+  App -> Sistema : Procesar_Pago()
+  activate Sistema
+  Sistema -> Pasarela : Solicitar pago (Monto, Metodo)
+  activate Pasarela
+  alt Pago aprobado
+    Pasarela --> Sistema : Pago aprobado (Id_Transaccion_Externo)
+    Sistema -> BD : Verificar_Pago() y Cambiar_Estado(Pagado)
+    Sistema -> BD : Registrar_Compra(Monto) y Actualizar_Vip()
+    Sistema -> WhatsApp : Enviar(Cliente, Cambio_Estado, Contenido)
+    Sistema --> App : Pedido confirmado
+  else Pago rechazado
+    Pasarela --> Sistema : Pago rechazado (Motivo)
+    Sistema -> BD : Rechazar_Pago(Motivo)
+    Sistema --> App : Error, puede reintentar
+  end
+  deactivate Pasarela
+  deactivate Sistema
+end
+
+App --> Cliente : Compra exitosa
+deactivate App
+@enduml

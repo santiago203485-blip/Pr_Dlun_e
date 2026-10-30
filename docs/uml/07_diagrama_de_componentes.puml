@@ -1,0 +1,57 @@
+@startuml Diagrama_De_Componentes_Dlune
+' Arquitectura del prototipo Dlune
+title Componentes del sistema Dlune
+
+component "App móvil / Navegador" as App
+
+node "Servidor web" {
+  component "Frontend\n(Plantillas Django + CSS responsive)" as Frontend
+
+  package "Backend (Django 6.1)" {
+    component "App_Usuarios" as Usuarios
+    component "App_Catalogo" as Catalogo
+    component "App_Inventario" as Inventario
+    component "App_Carrito" as Carrito
+    component "App_Pedidos" as Pedidos
+    component "App_Pagos" as Pagos
+    component "App_Domicilios" as Domicilios
+    component "App_Ventas" as Ventas
+    component "App_Clientes" as Clientes
+    component "App_Notificaciones" as Notificaciones
+    component "App_Personalizacion" as Personalizacion
+    component "App_Reportes" as Reportes
+    component "App_Administracion" as Administracion
+  }
+}
+
+database "Base de Datos\n(SQLite / PostgreSQL)" as BD
+component "Sistema de Pago\n(Wompi / PayU)" as Pasarela
+component "API de WhatsApp\n(WhatsApp Business)" as WhatsApp
+
+App ..> Frontend : HTTP
+Frontend ..> Usuarios
+Frontend ..> Catalogo
+Frontend ..> Carrito
+Frontend ..> Pedidos
+Frontend ..> Administracion
+
+Carrito ..> Catalogo
+Pedidos ..> Carrito
+Pedidos ..> Inventario
+Pedidos ..> Domicilios
+Pedidos ..> Notificaciones
+Ventas ..> Inventario
+Reportes ..> Ventas
+Reportes ..> Pedidos
+Administracion ..> Reportes
+Clientes ..> Usuarios
+Personalizacion ..> Notificaciones
+
+Usuarios ..> BD : ORM
+Pedidos ..> BD : ORM
+Ventas ..> BD : ORM
+Catalogo ..> BD : ORM
+Pagos ..> Pasarela : Solicitar pago
+Pedidos ..> Pagos
+Notificaciones ..> WhatsApp : Enviar mensaje
+@enduml

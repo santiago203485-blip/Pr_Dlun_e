@@ -1,0 +1,459 @@
+@startuml Diagrama_De_Clases_Dlune
+' Diagrama de clases del sistema Dlune (tienda de pijamas con estampados)
+' Convención: cada palabra inicia en mayúscula y las palabras se unen con "_"
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+left to right direction
+
+' ===================== Enumeraciones =====================
+enum Rol_Usuario {
+  Admin
+  Vendedor
+  Bodega
+  Repartidor
+  Cliente
+}
+
+enum Genero_Producto {
+  Mujer
+  Hombre
+  Infantil
+}
+
+enum Tipo_Movimiento {
+  Entrada
+  Salida
+}
+
+enum Estado_Pedido {
+  Creado
+  En_Proceso
+  Pendiente_Pago
+  Pagado
+  Enviado
+  Entregado
+  Cancelado
+}
+
+enum Metodo_Pago {
+  Efectivo
+  Tarjeta
+  Nequi
+  Daviplata
+  Transferencia
+  Contra_Entrega
+}
+
+enum Tipo_Entrega {
+  Domicilio
+  Retiro_Tienda
+}
+
+enum Estado_Pago {
+  Pendiente
+  Aprobado
+  Rechazado
+}
+
+enum Estado_Venta {
+  Activa
+  Anulada
+}
+
+enum Tipo_Notificacion {
+  Confirmacion_Pedido
+  Cambio_Estado
+  Campana_Masiva
+  Producto_Disponible
+}
+
+enum Estado_Envio {
+  Enviado
+  Omitido
+}
+
+enum Estado_Diseno {
+  Solicitado
+  Cotizado
+  Aprobado
+  En_Produccion
+  Terminado
+  Rechazado
+}
+
+' ===================== Usuarios y roles =====================
+class Usuario {
+  -Id_Usuario: INT
+  -Usuario: STRING
+  -Nombres: STRING
+  -Apellidos: STRING
+  -Email: STRING
+  -Contrasena: STRING
+  -Telefono: STRING
+  -Foto: STRING
+  -Rol: Rol_Usuario
+  -Activo: BOOLEAN
+  -Ultimo_Acceso: DATETIME
+  +Iniciar_Sesion(Usuario: STRING, Contrasena: STRING): BOOLEAN
+  +Cerrar_Sesion(): VOID
+  +Cambiar_Contrasena(Anterior: STRING, Nueva: STRING): BOOLEAN
+  +Editar_Perfil(Nombres: STRING, Apellidos: STRING, Email: STRING, Telefono: STRING, Foto: STRING): VOID
+  +Obtener_Nombre_Completo(): STRING
+}
+
+class Administrador {
+  +Ver_Dashboard(): VOID
+  +Gestionar_Usuarios(): VOID
+  +Activar_Desactivar_Usuario(Usuario: Usuario): VOID
+  +Gestionar_Categorias(): VOID
+  +Gestionar_Productos(): VOID
+  +Gestionar_Pedidos(): VOID
+  +Asignar_Repartidor(Pedido: Pedido, Repartidor: Repartidor): VOID
+  +Anular_Venta(Venta: Venta): BOOLEAN
+  +Configurar_Domicilios(): VOID
+  +Gestionar_Cupones(): VOID
+  +Recalcular_Vip(): INT
+  +Enviar_Whatsapp_Masivo(Segmento: STRING, Mensaje: STRING): INT
+  +Generar_Reportes(Desde: DATE, Hasta: DATE): VOID
+  +Exportar_Reporte(Tipo: STRING, Desde: DATE, Hasta: DATE): VOID
+  +Configurar_Tienda(): VOID
+}
+
+class Vendedor {
+  +Registrar_Venta(Cliente: Cliente, Detalles: List<Detalle_Venta>, Metodo_Pago: Metodo_Pago): Venta
+  +Consultar_Cliente(Busqueda: STRING): List<Cliente>
+  +Consultar_Producto(Busqueda: STRING): List<Producto>
+  +Imprimir_Factura(Venta: Venta): VOID
+  +Cambiar_Estado_Pedido(Pedido: Pedido, Nuevo_Estado: Estado_Pedido, Comentario: STRING): BOOLEAN
+  +Responder_Diseno(Diseno: Diseno_Personalizado, Estado: Estado_Diseno, Precio: DECIMAL, Respuesta: STRING): VOID
+}
+
+class Auxiliar_Bodega {
+  +Gestionar_Productos(): VOID
+  +Registrar_Movimiento(Producto: Producto, Tipo: Tipo_Movimiento, Cantidad: INT, Motivo: STRING): Movimiento_Inventario
+  +Ver_Stock_Bajo(): List<Producto>
+  +Ver_Historial_Movimientos(): List<Movimiento_Inventario>
+}
+
+class Repartidor {
+  +Ver_Entregas_Asignadas(): List<Pedido>
+  +Marcar_En_Camino(Pedido: Pedido, Comentario: STRING): BOOLEAN
+  +Marcar_Entregado(Pedido: Pedido, Comentario: STRING): BOOLEAN
+  +Registrar_No_Pago(Pedido: Pedido, Comentario: STRING): BOOLEAN
+}
+
+class Cliente {
+  -Fecha_Registro: DATE
+  -Total_Compras: INT
+  -Total_Gastado: DECIMAL
+  -Es_Vip: BOOLEAN
+  -Notificaciones_Whatsapp: BOOLEAN
+  -Visitas: INT
+  -Ultima_Compra: DATETIME
+  +Registrarse(): BOOLEAN
+  +Eliminar_Cuenta(): BOOLEAN
+  +Agregar_Direccion(Direccion: Direccion): VOID
+  +Ver_Historial_Pedidos(): List<Pedido>
+  +Ver_Detalle_Pedido(Id_Pedido: INT): Pedido
+  +Cancelar_Pedido(Id_Pedido: INT): BOOLEAN
+  +Solicitar_Notificacion_Stock(Producto: Producto): VOID
+  +Solicitar_Diseno(Diseno: Diseno_Personalizado): VOID
+  +Registrar_Compra(Monto: DECIMAL): VOID
+  +Actualizar_Vip(): BOOLEAN
+  +Calcular_Dias_Inactivo(): INT
+}
+
+' ===================== Catálogo e inventario =====================
+class Categoria {
+  -Id_Categoria: INT
+  -Nombre: STRING
+  -Descripcion: STRING
+  +Obtener_Productos(): List<Producto>
+}
+
+class Producto {
+  -Id_Producto: INT
+  -Codigo: STRING
+  -Nombre: STRING
+  -Descripcion: STRING
+  -Id_Categoria: INT
+  -Genero: Genero_Producto
+  -Tallas: STRING
+  -Colores: STRING
+  -Stock: INT
+  -Stock_Minimo: INT
+  -Precio_Compra: DECIMAL
+  -Porcentaje_Ganancia: DECIMAL
+  -Precio_Venta: DECIMAL
+  -Imagen: STRING
+  -Visible: BOOLEAN
+  -Veces_Vendido: INT
+  -Fecha_Registro: DATETIME
+  +Calcular_Precio_Venta(): DECIMAL
+  +Actualizar_Stock(Cantidad: INT): VOID
+  +Esta_En_Stock_Bajo(): BOOLEAN
+  +Esta_Agotado(): BOOLEAN
+  +Obtener_Tallas_Disponibles(): List<STRING>
+  +Obtener_Colores_Disponibles(): List<STRING>
+}
+
+class Movimiento_Inventario {
+  -Id_Movimiento: INT
+  -Id_Producto: INT
+  -Id_Usuario: INT
+  -Tipo: Tipo_Movimiento
+  -Cantidad: INT
+  -Motivo: STRING
+  -Fecha: DATETIME
+  +{static} Registrar(Producto: Producto, Tipo: Tipo_Movimiento, Cantidad: INT, Motivo: STRING, Usuario: Usuario): Movimiento_Inventario
+}
+
+' ===================== Carrito =====================
+class Carrito {
+  -Id_Carrito: INT
+  -Id_Cliente: INT
+  -Fecha_Creacion: DATETIME
+  -Ultima_Actualizacion: DATETIME
+  +Agregar_Producto(Producto: Producto, Cantidad: INT, Talla: STRING, Color: STRING): Item_Carrito
+  +Eliminar_Producto(Id_Item: INT): VOID
+  +Modificar_Cantidad(Id_Item: INT, Cantidad: INT): VOID
+  +Vaciar_Carrito(): VOID
+  +Obtener_Items(): List<Item_Carrito>
+  +Calcular_Subtotal(): DECIMAL
+  +Calcular_Cantidad_Total(): INT
+}
+
+class Item_Carrito {
+  -Id_Item: INT
+  -Id_Carrito: INT
+  -Id_Producto: INT
+  -Cantidad: INT
+  -Talla: STRING
+  -Color: STRING
+  +Calcular_Subtotal(): DECIMAL
+}
+
+' ===================== Domicilios =====================
+class Direccion {
+  -Id_Direccion: INT
+  -Id_Cliente: INT
+  -Departamento: STRING
+  -Ciudad: STRING
+  -Barrio: STRING
+  -Direccion_Completa: STRING
+  -Instrucciones: STRING
+  -Telefono_Contacto: STRING
+  -Es_Principal: BOOLEAN
+  +Validar_Cobertura(): BOOLEAN
+  +Obtener_Costo_Domicilio(): DECIMAL
+}
+
+class Zona_Domicilio {
+  -Id_Zona: INT
+  -Ciudad: STRING
+  -Barrio: STRING
+  -Costo: DECIMAL
+  -Activa: BOOLEAN
+}
+
+' ===================== Pedidos y pagos =====================
+class Pedido {
+  -Id_Pedido: INT
+  -Id_Cliente: INT
+  -Id_Repartidor: INT
+  -Fecha: DATETIME
+  -Subtotal: DECIMAL
+  -Costo_Domicilio: DECIMAL
+  -Impuesto: DECIMAL
+  -Descuento: DECIMAL
+  -Total: DECIMAL
+  -Estado: Estado_Pedido
+  -Metodo_Pago: Metodo_Pago
+  -Tipo_Entrega: Tipo_Entrega
+  -Direccion_Entrega: STRING
+  -Horario_Entrega: STRING
+  -Cupon: STRING
+  -Notas_Internas: TEXT
+  +Calcular_Total(): DECIMAL
+  +Puede_Cambiar_A(Nuevo_Estado: Estado_Pedido): BOOLEAN
+  +Cambiar_Estado(Nuevo_Estado: Estado_Pedido, Usuario: Usuario, Comentario: STRING): BOOLEAN
+  +Asignar_Repartidor(Repartidor: Repartidor): VOID
+  +Aplicar_Cupon(Codigo: STRING): DECIMAL
+  +Obtener_Historial_Estados(): List<Historial_Estado>
+  +Devolver_Stock(): VOID
+  +Esta_Activo(): BOOLEAN
+}
+
+class Detalle_Pedido {
+  -Id_Detalle: INT
+  -Id_Pedido: INT
+  -Id_Producto: INT
+  -Cantidad: INT
+  -Talla: STRING
+  -Color: STRING
+  -Precio_Unitario: DECIMAL
+  -Subtotal: DECIMAL
+  +Calcular_Subtotal(): DECIMAL
+}
+
+class Historial_Estado {
+  -Id_Historial: INT
+  -Id_Pedido: INT
+  -Id_Usuario: INT
+  -Estado: Estado_Pedido
+  -Fecha: DATETIME
+  -Comentario: STRING
+}
+
+class Pago {
+  -Id_Pago: INT
+  -Id_Pedido: INT
+  -Monto: DECIMAL
+  -Metodo: Metodo_Pago
+  -Estado: Estado_Pago
+  -Comprobante: STRING
+  -Fecha_Transaccion: DATETIME
+  -Id_Transaccion_Externo: STRING
+  -Motivo_Rechazo: STRING
+  +Procesar_Pago(Aprobado: BOOLEAN, Motivo: STRING): BOOLEAN
+  +Verificar_Pago(): BOOLEAN
+  +Rechazar_Pago(Motivo: STRING): VOID
+}
+
+class Cupon {
+  -Id_Cupon: INT
+  -Codigo: STRING
+  -Porcentaje: DECIMAL
+  -Activo: BOOLEAN
+  +Calcular_Descuento(Subtotal: DECIMAL): DECIMAL
+}
+
+' ===================== Ventas en tienda =====================
+class Venta {
+  -Id_Venta: INT
+  -Id_Vendedor: INT
+  -Id_Cliente: INT
+  -Fecha: DATETIME
+  -Subtotal: DECIMAL
+  -Impuesto: DECIMAL
+  -Total: DECIMAL
+  -Metodo_Pago: Metodo_Pago
+  -Estado: Estado_Venta
+  +Calcular_Total(): DECIMAL
+  +Anular(Usuario: Usuario): BOOLEAN
+}
+
+class Detalle_Venta {
+  -Id_Detalle_Venta: INT
+  -Id_Venta: INT
+  -Id_Producto: INT
+  -Cantidad: INT
+  -Precio_Unitario: DECIMAL
+  -Subtotal: DECIMAL
+  +Calcular_Subtotal(): DECIMAL
+}
+
+' ===================== Notificaciones =====================
+class Notificacion {
+  -Id_Notificacion: INT
+  -Id_Cliente: INT
+  -Tipo: Tipo_Notificacion
+  -Destinatario: STRING
+  -Contenido: TEXT
+  -Fecha_Envio: DATETIME
+  -Estado_Envio: Estado_Envio
+  +{static} Enviar(Cliente: Cliente, Tipo: Tipo_Notificacion, Contenido: TEXT): Notificacion
+}
+
+class Solicitud_Stock {
+  -Id_Solicitud: INT
+  -Id_Cliente: INT
+  -Id_Producto: INT
+  -Fecha: DATETIME
+  -Atendida: BOOLEAN
+  +{static} Avisar_Disponibilidad(Producto: Producto): INT
+}
+
+' ===================== Personalización y configuración =====================
+class Diseno_Personalizado {
+  -Id_Diseno: INT
+  -Id_Cliente: INT
+  -Id_Producto_Base: INT
+  -Descripcion: TEXT
+  -Imagen_Referencia: STRING
+  -Talla: STRING
+  -Color: STRING
+  -Cantidad: INT
+  -Estado: Estado_Diseno
+  -Precio_Cotizado: DECIMAL
+  -Respuesta_Tienda: TEXT
+  -Fecha: DATETIME
+  +Cotizar(Precio: DECIMAL, Respuesta: STRING): VOID
+  +Responder_Cotizacion(Acepta: BOOLEAN): VOID
+}
+
+class Configuracion_Tienda {
+  -Id_Configuracion: INT
+  -Nombre_Tienda: STRING
+  -Telefono_Whatsapp: STRING
+  -Impuesto_Porcentaje: DECIMAL
+  -Costo_Domicilio_Base: DECIMAL
+  -Vip_Min_Compras: INT
+  -Vip_Min_Gastado: DECIMAL
+  -Dias_Cliente_Inactivo: INT
+  +{static} Obtener(): Configuracion_Tienda
+  +Calcular_Impuesto(Subtotal: DECIMAL): DECIMAL
+}
+
+' ===================== Relaciones =====================
+' Herencia: cada rol es un tipo de usuario
+Usuario <|-- Administrador
+Usuario <|-- Vendedor
+Usuario <|-- Auxiliar_Bodega
+Usuario <|-- Repartidor
+Usuario <|-- Cliente
+
+' Catálogo e inventario
+Categoria "1" o-- "0..*" Producto : Clasifica >
+Producto "1" -- "0..*" Movimiento_Inventario : Registra >
+Usuario "1" -- "0..*" Movimiento_Inventario : Realiza >
+
+' Carrito
+Cliente "1" *-- "1" Carrito : Tiene >
+Carrito "1" *-- "0..*" Item_Carrito : Contiene >
+Item_Carrito "0..*" --> "1" Producto : Referencia >
+
+' Domicilios
+Cliente "1" *-- "0..*" Direccion : Registra >
+Direccion ..> Zona_Domicilio : Consulta cobertura >
+
+' Pedidos y pagos
+Cliente "1" -- "0..*" Pedido : Realiza >
+Repartidor "0..1" -- "0..*" Pedido : Entrega >
+Pedido "1" *-- "1..*" Detalle_Pedido : Contiene >
+Detalle_Pedido "0..*" --> "1" Producto : Referencia >
+Pedido "1" *-- "1..*" Historial_Estado : Registra >
+Pedido "1" *-- "0..*" Pago : Recibe >
+Pedido ..> Cupon : Aplica >
+
+' Ventas en tienda
+Vendedor "1" -- "0..*" Venta : Registra >
+Cliente "0..1" -- "0..*" Venta : Compra >
+Venta "1" *-- "1..*" Detalle_Venta : Contiene >
+Detalle_Venta "0..*" --> "1" Producto : Referencia >
+
+' Notificaciones
+Cliente "1" *-- "0..*" Notificacion : Recibe >
+Cliente "1" -- "0..*" Solicitud_Stock : Solicita >
+Solicitud_Stock "0..*" --> "1" Producto : Espera >
+
+' Personalización
+Cliente "1" -- "0..*" Diseno_Personalizado : Solicita >
+Diseno_Personalizado "0..*" --> "0..1" Producto : Basado en >
+
+' Configuración usada en los cálculos
+Pedido ..> Configuracion_Tienda : Usa impuesto >
+Venta ..> Configuracion_Tienda : Usa impuesto >
+Cliente ..> Configuracion_Tienda : Usa criterios VIP >
+@enduml

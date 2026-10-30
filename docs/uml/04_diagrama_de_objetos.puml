@@ -1,0 +1,95 @@
+@startuml Diagrama_De_Objetos_Dlune
+' Instantánea de una compra en línea con los datos de prueba del proyecto (comando datos_demo)
+' Valores: pijama PJ-001 (precio compra 45.000 + 60% = 72.000), cupón DLUNE10 (10%), impuesto 19%, domicilio Medellín 8.000
+' Total = 72.000 - 7.200 + 12.312 + 8.000 = 85.112
+
+object "Cliente1 : Cliente" as Cliente1 {
+  Id_Usuario = 5
+  Usuario = "cliente"
+  Nombres = "María"
+  Apellidos = "López"
+  Email = "cliente@dlune.test"
+  Rol = Cliente
+  Total_Compras = 1
+  Total_Gastado = 85112
+  Es_Vip = false
+  Notificaciones_Whatsapp = true
+}
+
+object "Categoria1 : Categoria" as Categoria1 {
+  Id_Categoria = 1
+  Nombre = "Navideña"
+}
+
+object "Pijama1 : Producto" as Pijama1 {
+  Id_Producto = 1
+  Codigo = "PJ-001"
+  Nombre = "Pijama Luna Estrellada"
+  Genero = Mujer
+  Tallas = "S,M,L,XL"
+  Colores = "Azul,Negro"
+  Stock = 19
+  Precio_Compra = 45000
+  Porcentaje_Ganancia = 60
+  Precio_Venta = 72000
+}
+
+object "Direccion1 : Direccion" as Direccion1 {
+  Id_Direccion = 1
+  Ciudad = "Medellín"
+  Barrio = "Laureles"
+  Direccion_Completa = "Calle 10 # 70-20"
+  Es_Principal = true
+}
+
+object "Pedido1 : Pedido" as Pedido1 {
+  Id_Pedido = 101
+  Estado = Pagado
+  Metodo_Pago = Tarjeta
+  Tipo_Entrega = Domicilio
+  Horario_Entrega = "8:00 - 12:00"
+  Subtotal = 72000
+  Descuento = 7200
+  Impuesto = 12312
+  Costo_Domicilio = 8000
+  Total = 85112
+  Cupon = "DLUNE10"
+}
+
+object "Detalle1 : Detalle_Pedido" as Detalle1 {
+  Id_Detalle = 1
+  Cantidad = 1
+  Talla = "M"
+  Color = "Negro"
+  Precio_Unitario = 72000
+  Subtotal = 72000
+}
+
+object "Pago1 : Pago" as Pago1 {
+  Id_Pago = 1
+  Monto = 85112
+  Metodo = Tarjeta
+  Estado = Aprobado
+  Id_Transaccion_Externo = "A1B2C3D4E5F6A7B8"
+}
+
+object "Historial1 : Historial_Estado" as Historial1 {
+  Estado = Pagado
+  Comentario = "Pago A1B2C3D4E5F6A7B8 aprobado"
+}
+
+object "Notificacion1 : Notificacion" as Notificacion1 {
+  Tipo = Cambio_Estado
+  Contenido = "Hola María López, tu pedido #101 ahora está: Pagado."
+  Estado_Envio = Enviado
+}
+
+Cliente1 -- Direccion1
+Cliente1 -- Pedido1
+Pedido1 -- Detalle1
+Detalle1 -- Pijama1
+Pijama1 -- Categoria1
+Pedido1 -- Pago1
+Pedido1 -- Historial1
+Cliente1 -- Notificacion1
+@enduml

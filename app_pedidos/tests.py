@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
@@ -13,7 +15,8 @@ class FlujoCompraTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        call_command('datos_demo', verbosity=0)
+        with mock.patch.dict('os.environ', {'DEMO_PASSWORD': 'dlune1234'}):
+            call_command('datos_demo', verbosity=0)
 
     def test_compra_completa_con_reintento_de_pago(self):
         self.client.login(username='cliente', password='dlune1234')
@@ -66,7 +69,8 @@ class FlujoCompraTest(TestCase):
 class VentaTiendaTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        call_command('datos_demo', verbosity=0)
+        with mock.patch.dict('os.environ', {'DEMO_PASSWORD': 'dlune1234'}):
+            call_command('datos_demo', verbosity=0)
 
     def test_vendedor_registra_venta(self):
         self.client.login(username='vendedora', password='dlune1234')

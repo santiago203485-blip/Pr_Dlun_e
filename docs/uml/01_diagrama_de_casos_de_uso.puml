@@ -1,0 +1,144 @@
+@startuml Diagrama_De_Casos_De_Uso_Dlune
+' Generado desde el diccionario de casos de uso: los ID y nombres coinciden con el Excel
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle default
+
+actor "Usuario" as Usuario
+actor "Cliente" as Cliente
+actor "Pasarela de pago" as Pasarela <<Sistema externo>>
+
+rectangle "Sistema Dlune" {
+  package "Cuenta y acceso" {
+    usecase "Iniciar sesión\n(CU-01)" as CU01
+    usecase "Registrar cuenta\n(CU-02)" as CU02
+    usecase "Cerrar sesión\n(CU-03)" as CU03
+    usecase "Gestionar perfil\n(CU-04)" as CU04
+    usecase "Cambiar contraseña\n(CU-05)" as CU05
+  }
+  package "Tienda en línea" {
+    usecase "Visualizar catálogo\n(CU-06)" as CU06
+    usecase "Buscar pijama\n(CU-07)" as CU07
+    usecase "Filtrar pijama\n(CU-08)" as CU08
+    usecase "Ver detalle de producto\n(CU-09)" as CU09
+    usecase "Solicitar aviso de disponibilidad\n(CU-10)" as CU10
+    usecase "Gestionar carrito\n(CU-11)" as CU11
+    usecase "Gestionar direcciones\n(CU-12)" as CU12
+    usecase "Realizar pedido\n(CU-13)" as CU13
+    usecase "Seleccionar entrega y horario\n(CU-14)" as CU14
+    usecase "Aplicar cupón\n(CU-15)" as CU15
+    usecase "Realizar pago\n(CU-16)" as CU16
+    usecase "Consultar mis pedidos\n(CU-17)" as CU17
+    usecase "Cancelar pedido\n(CU-18)" as CU18
+    usecase "Solicitar diseño personalizado\n(CU-19)" as CU19
+  }
+  package "Ventas e inventario" {
+    usecase "Registrar venta\n(CU-20)" as CU20
+    usecase "Imprimir factura\n(CU-21)" as CU21
+    usecase "Consultar y anular ventas\n(CU-22)" as CU22
+    usecase "Gestionar productos\n(CU-23)" as CU23
+    usecase "Gestionar inventario\n(CU-24)" as CU24
+  }
+  package "Panel de administración" {
+    usecase "Ver panel de métricas\n(CU-25)" as CU25
+    usecase "Gestionar usuarios\n(CU-26)" as CU26
+    usecase "Gestionar categorías\n(CU-27)" as CU27
+    usecase "Gestionar pedidos\n(CU-28)" as CU28
+    usecase "Cambiar estado de pedido\n(CU-29)" as CU29
+    usecase "Asignar repartidor\n(CU-30)" as CU30
+    usecase "Gestionar clientes\n(CU-31)" as CU31
+    usecase "Gestionar diseños personalizados\n(CU-32)" as CU32
+    usecase "Enviar WhatsApp masivo\n(CU-34)" as CU34
+    usecase "Generar reportes\n(CU-35)" as CU35
+    usecase "Configurar tienda y domicilios\n(CU-36)" as CU36
+  }
+  package "Entregas y notificaciones" {
+    usecase "Enviar notificación WhatsApp\n(CU-33)" as CU33
+    usecase "Gestionar entregas\n(CU-37)" as CU37
+  }
+}
+
+actor "Administrador" as Administrador
+actor "Vendedor" as Vendedor
+actor "Auxiliar de bodega" as Bodega
+actor "Repartidor" as Repartidor
+actor "API de WhatsApp" as WhatsApp <<Sistema externo>>
+
+' Generalización de actores
+Cliente --|> Usuario
+Administrador --|> Usuario
+Vendedor --|> Usuario
+Bodega --|> Usuario
+Repartidor --|> Usuario
+
+' Actores y casos de uso
+Usuario --> CU01
+Cliente --> CU02
+Usuario --> CU03
+Usuario --> CU04
+Usuario --> CU05
+Cliente --> CU06
+Cliente --> CU07
+Cliente --> CU08
+Cliente --> CU09
+Cliente --> CU10
+Cliente --> CU11
+Cliente --> CU12
+Cliente --> CU13
+Cliente --> CU14
+Cliente --> CU15
+Cliente --> CU16
+Pasarela --> CU16
+Cliente --> CU17
+Cliente --> CU18
+Cliente --> CU19
+CU20 <-- Vendedor
+CU20 <-- Administrador
+CU21 <-- Vendedor
+CU21 <-- Administrador
+CU22 <-- Vendedor
+CU22 <-- Administrador
+CU23 <-- Administrador
+CU23 <-- Bodega
+CU24 <-- Bodega
+CU24 <-- Administrador
+CU25 <-- Administrador
+CU26 <-- Administrador
+CU27 <-- Administrador
+CU28 <-- Administrador
+CU28 <-- Vendedor
+CU29 <-- Administrador
+CU29 <-- Vendedor
+CU30 <-- Administrador
+CU30 <-- Vendedor
+CU31 <-- Administrador
+CU31 <-- Vendedor
+CU32 <-- Administrador
+CU32 <-- Vendedor
+CU33 <-- WhatsApp
+CU34 <-- Administrador
+CU34 <-- WhatsApp
+CU35 <-- Administrador
+CU36 <-- Administrador
+CU37 <-- Repartidor
+
+' Relaciones include y extend
+CU05 ..> CU04 : <<extend>>
+CU07 ..> CU06 : <<extend>>
+CU08 ..> CU06 : <<extend>>
+CU10 ..> CU09 : <<extend>>
+CU13 ..> CU14 : <<include>>
+CU13 ..> CU33 : <<include>>
+CU15 ..> CU13 : <<extend>>
+CU16 ..> CU33 : <<include>>
+CU16 ..> CU13 : <<extend>>
+CU18 ..> CU33 : <<include>>
+CU18 ..> CU17 : <<extend>>
+CU20 ..> CU21 : <<include>>
+CU24 ..> CU33 : <<include>>
+CU29 ..> CU33 : <<include>>
+CU29 ..> CU28 : <<extend>>
+CU30 ..> CU28 : <<extend>>
+CU32 ..> CU33 : <<include>>
+CU37 ..> CU33 : <<include>>
+@enduml

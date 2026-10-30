@@ -1,0 +1,77 @@
+@startuml Diagrama_De_Actividades_Dlune
+' Compra en línea: de la cuenta del cliente al pedido confirmado (CU-01, CU-02, CU-06 a CU-16)
+title Compra en línea de una pijama
+
+start
+if (¿Tienes cuenta?) then (Sí)
+  :Iniciar sesión;
+else (No)
+  :Registrarse;
+endif
+:Validar datos;
+if (¿Datos válidos?) then (No)
+  :Mostrar "Usuario o contraseña incorrectos";
+  stop
+else (Sí)
+endif
+
+repeat
+  :Visualizar catálogo;
+  if (¿Cómo busca?) then (Buscar)
+    :Buscar por nombre, código o estampado;
+  else (Filtrar)
+    switch (Género)
+    case (Mujer)
+      :Filtrar Mujer;
+    case (Hombre)
+      :Filtrar Hombre;
+    case (Infantil)
+      :Filtrar Infantil;
+    endswitch
+  endif
+  :Ver detalle de producto;
+  if (¿Producto agotado?) then (Sí)
+    :Solicitar aviso de disponibilidad;
+  else (No)
+    :Escoger talla, color y cantidad;
+    :Agregar al carrito;
+  endif
+repeat while (¿Seguir comprando?) is (Sí) not (No)
+
+:Ver carrito;
+:Confirmar pedido;
+if (¿Tipo de entrega?) then (Domicilio)
+  :Seleccionar dirección de envío;
+  if (¿Hay cobertura?) then (No)
+    :Mostrar "No hay cobertura. Elige retiro en tienda";
+    :Seleccionar retiro en tienda;
+  else (Sí)
+    :Calcular costo de domicilio;
+  endif
+else (Retiro en tienda)
+  :Seleccionar retiro en tienda;
+endif
+:Seleccionar horario de entrega;
+:Seleccionar método de pago;
+if (¿Tiene cupón?) then (Sí)
+  :Aplicar cupón;
+else (No)
+endif
+:Crear pedido y descontar inventario;
+:Enviar confirmación por WhatsApp;
+
+if (¿Pago contra entrega?) then (Sí)
+  :Pedido pendiente de pago;
+else (No)
+  repeat
+    :Procesar pago;
+    if (¿Pago aprobado?) then (No)
+      :Mostrar error;
+    else (Sí)
+    endif
+  repeat while (¿Reintentar?) is (Pago rechazado) not (Pago aprobado)
+  :Pedido pagado;
+endif
+:Pedido confirmado;
+stop
+@enduml

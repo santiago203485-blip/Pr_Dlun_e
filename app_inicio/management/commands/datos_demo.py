@@ -1,3 +1,6 @@
+import os
+
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from app_administracion.models import ConfiguracionTienda
@@ -36,6 +39,16 @@ class Command(BaseCommand):
     def handle(self, *args, **opciones):
         ConfiguracionTienda.obtener()
 
+        # En producción no se crean usuarios con la clave conocida: se exige DEMO_PASSWORD
+        clave = os.environ.get('DEMO_PASSWORD') or (CLAVE_DEMO if settings.DEBUG else None)
+        if clave:
+            self.crear_usuarios(clave)
+            self.stdout.write(f'Usuarios de prueba: {", ".join(u[0] for u in USUARIOS)}')
+        else:
+            self.stdout.write('DEBUG=False y sin DEMO_PASSWORD: se cargan productos sin usuarios de prueba.')
+        self.crear_catalogo()
+
+    def crear_usuarios(self, clave):
         for username, nombre, apellido, rol in USUARIOS:
             usuario, creado = Usuario.objects.get_or_create(
                 username=username,
@@ -43,7 +56,7 @@ class Command(BaseCommand):
                           'email': f'{username}@dlune.test', 'telefono': '3001234567'},
             )
             if creado:
-                usuario.set_password(CLAVE_DEMO)
+                usuario.set_password(clave)
                 usuario.is_staff = usuario.is_superuser = rol == 'admin'
                 usuario.save()
 
@@ -54,6 +67,7 @@ class Command(BaseCommand):
                 direccion_completa='Calle 10 # 70-20', telefono_contacto='3001234567', es_principal=True,
             )
 
+    def crear_catalogo(self):
         ZonaDomicilio.objects.get_or_create(ciudad='Medellín', barrio='', defaults={'costo': 8000})
         ZonaDomicilio.objects.get_or_create(ciudad='Envigado', barrio='', defaults={'costo': 10000})
         Cupon.objects.get_or_create(codigo='DLUNE10', defaults={'porcentaje': 10})
@@ -69,6 +83,4 @@ class Command(BaseCommand):
                 },
             )
 
-        self.stdout.write(self.style.SUCCESS(
-            f'Datos de prueba listos. Usuarios: {", ".join(u[0] for u in USUARIOS)} (contraseña: {CLAVE_DEMO})'
-        ))
+        self.stdout.write(self.style.SUCCESS('Datos de prueba listos.'))

@@ -1,0 +1,33 @@
+@startuml Diagrama_De_Estados_Pedido
+' Estados del Pedido (Estado_Pedido) y transiciones permitidas por Pedido.Cambiar_Estado()
+title Estados de un Pedido
+hide empty description
+
+state "Creado" as Creado
+state "En proceso" as En_Proceso
+state "Pendiente de pago" as Pendiente_Pago
+state "Pagado" as Pagado
+state "Enviado" as Enviado
+state "Entregado" as Entregado
+state "Cancelado" as Cancelado : Entry / Devolver_Stock()
+
+[*] --> Creado : Cliente confirma el pedido
+Creado --> En_Proceso : Pedido registrado
+Creado --> Cancelado : Cancelar
+
+En_Proceso --> Pagado : Pago aprobado
+En_Proceso --> Pendiente_Pago : Pago contra entrega
+En_Proceso --> Cancelado : Cancelar
+
+Pendiente_Pago --> Enviado : Repartidor sale (En camino)
+Pendiente_Pago --> Cancelado : Cancelar
+
+Pagado --> Enviado : Repartidor sale (En camino)
+Pagado --> Cancelado : Cancelar
+
+Enviado --> Entregado : Repartidor entrega
+Enviado --> Cancelado : Cliente no paga (contra entrega)
+
+Entregado --> [*]
+Cancelado --> [*]
+@enduml
