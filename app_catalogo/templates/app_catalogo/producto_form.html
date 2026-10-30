@@ -1,16 +1,68 @@
 {% extends 'base.html' %}
 {% load dlune %}
-{% block titulo %}{% if producto %}Editar{% else %}Nuevo{% endif %} producto{% endblock %}
+{% block titulo %}{% if producto %}Editar{% else %}Agregar{% endif %} producto{% endblock %}
 {% block contenido %}
-<div class="tarjeta formulario">
-    <h1>{% if producto %}Editar "{{ producto.nombre }}"{% else %}Nuevo producto{% endif %}</h1>
-    {% if producto %}<p class="texto-gris">Precio de venta actual: <strong>{{ producto.precio_venta|pesos }}</strong></p>{% endif %}
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <p class="ayuda">El precio de venta se calcula automáticamente: precio de compra × (1 + % ganancia).</p>
-        <button type="submit">Guardar</button>
-        <a href="{% url 'catalogo:productos' %}" class="btn btn-secundario">Cancelar</a>
-    </form>
+<div class="cabecera">
+    <h1>{% if producto %}Editar "{{ producto.nombre }}"{% else %}Agregar producto{% endif %}</h1>
+    <a href="{% url 'catalogo:productos' %}" class="btn btn-secundario"><i class="bi bi-arrow-left"></i> Volver a productos</a>
 </div>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="grid-2" style="grid-template-columns: minmax(260px, 1fr) 2fr;">
+        <div class="tarjeta">
+            <h3>Imagen</h3>
+            <div class="vista-previa" id="vista-previa">
+                {% if producto.imagen %}<img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">{% else %}🌙{% endif %}
+            </div>
+            {{ form.imagen.errors }}{{ form.imagen }}
+            <span class="ayuda">{{ form.imagen.help_text }}</span>
+            <h3 style="margin-top:22px">Precio</h3>
+            <p><label for="{{ form.precio_compra.id_for_label }}">Precio de compra</label>{{ form.precio_compra.errors }}{{ form.precio_compra }}</p>
+            <p><label for="{{ form.porcentaje_ganancia.id_for_label }}">{{ form.porcentaje_ganancia.label }}</label>{{ form.porcentaje_ganancia.errors }}{{ form.porcentaje_ganancia }}</p>
+            <div class="precio-calculado"><span>Precio de venta</span><strong id="precio-venta">{{ producto.precio_venta|default:0|pesos }}</strong></div>
+        </div>
+        <div class="tarjeta">
+            <h3>Información del producto</h3>
+            <div class="campos-2">
+                <p><label for="{{ form.nombre.id_for_label }}">Nombre</label>{{ form.nombre.errors }}{{ form.nombre }}</p>
+                <p><label for="{{ form.codigo.id_for_label }}">{{ form.codigo.label }}</label>{{ form.codigo.errors }}{{ form.codigo }}</p>
+            </div>
+            <p><label for="{{ form.descripcion.id_for_label }}">{{ form.descripcion.label }}</label>{{ form.descripcion.errors }}{{ form.descripcion }}</p>
+            <div class="campos-2">
+                <p><label for="{{ form.categoria.id_for_label }}">{{ form.categoria.label }}</label>{{ form.categoria.errors }}{{ form.categoria }}</p>
+                <p><label for="{{ form.genero.id_for_label }}">{{ form.genero.label }}</label>{{ form.genero.errors }}{{ form.genero }}</p>
+                <p><label for="{{ form.tallas.id_for_label }}">Tallas (separadas por coma)</label>{{ form.tallas.errors }}{{ form.tallas }}</p>
+                <p><label for="{{ form.colores.id_for_label }}">Colores (separados por coma)</label>{{ form.colores.errors }}{{ form.colores }}</p>
+                <p><label for="{{ form.stock.id_for_label }}">Stock</label>{{ form.stock.errors }}{{ form.stock }}</p>
+                <p><label for="{{ form.stock_minimo.id_for_label }}">{{ form.stock_minimo.label }}</label>{{ form.stock_minimo.errors }}{{ form.stock_minimo }}</p>
+            </div>
+            <p><label>{{ form.visible }} {{ form.visible.label }}</label></p>
+            <div class="acciones">
+                <button type="submit" class="btn-grande"><i class="bi bi-check2"></i> Guardar producto</button>
+                <a href="{% url 'catalogo:productos' %}" class="btn btn-secundario btn-grande">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Vista previa de la imagen y cálculo del precio de venta mientras se escribe
+    const archivo = document.getElementById('{{ form.imagen.id_for_label }}');
+    const vista = document.getElementById('vista-previa');
+    archivo.addEventListener('change', () => {
+        const f = archivo.files[0];
+        if (f) { vista.innerHTML = '<img alt="Vista previa">'; vista.firstChild.src = URL.createObjectURL(f); }
+    });
+    const compra = document.getElementById('{{ form.precio_compra.id_for_label }}');
+    const ganancia = document.getElementById('{{ form.porcentaje_ganancia.id_for_label }}');
+    const salida = document.getElementById('precio-venta');
+    function calcular() {
+        const valor = Math.round((parseFloat(compra.value) || 0) * (1 + (parseFloat(ganancia.value) || 0) / 100));
+        salida.textContent = '$' + valor.toLocaleString('es-CO');
+    }
+    compra.addEventListener('input', calcular);
+    ganancia.addEventListener('input', calcular);
+    if (compra.value) calcular();
+</script>
 {% endblock %}

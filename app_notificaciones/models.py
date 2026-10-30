@@ -5,7 +5,7 @@ from app_clientes.models import Cliente
 
 
 class Notificacion(models.Model):
-    """Mensaje de WhatsApp enviado a un cliente (el envío real a la API se simula)."""
+    """Mensaje para un cliente: se ve en su bandeja de la tienda y se registra para WhatsApp."""
 
     TIPO_PEDIDO = 'pedido'
     TIPO_ESTADO = 'estado'
@@ -14,7 +14,7 @@ class Notificacion(models.Model):
     TIPOS = [
         (TIPO_PEDIDO, 'Confirmación de pedido'),
         (TIPO_ESTADO, 'Cambio de estado'),
-        (TIPO_CAMPANA, 'Campaña masiva'),
+        (TIPO_CAMPANA, 'Mensaje de la tienda'),
         (TIPO_STOCK, 'Producto disponible'),
     ]
     ENVIADO = 'enviado'
@@ -23,10 +23,12 @@ class Notificacion(models.Model):
 
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, related_name='notificaciones')
     tipo = models.CharField(max_length=10, choices=TIPOS)
+    asunto = models.CharField(max_length=120, blank=True)
     destinatario = models.CharField(max_length=20, blank=True)
     contenido = models.TextField()
     fecha_envio = models.DateTimeField(auto_now_add=True)
     estado_envio = models.CharField(max_length=10, choices=ESTADOS_ENVIO, default=ENVIADO)
+    leida = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = 'notificación'
@@ -37,13 +39,25 @@ class Notificacion(models.Model):
         return f'{self.get_tipo_display()} a {self.cliente}'
 
     @classmethod
-    def enviar(cls, cliente, tipo, contenido):
-        """Registra el mensaje. Aquí se conectaría la WhatsApp Business API."""
+    def enviar(cls, cliente, tipo, contenido, asunto=''):
+        """Deja el mensaje en la bandeja del cliente. Aquí se conectaría la WhatsApp Business API."""
         puede = cliente.notificaciones_whatsapp and bool(cliente.telefono)
         return cls.objects.create(
-            cliente=cliente, tipo=tipo, destinatario=cliente.telefono, contenido=contenido,
+            cliente=cliente, tipo=tipo, asunto=asunto, destinatario=cliente.telefono, contenido=contenido,
             estado_envio=cls.ENVIADO if puede else cls.OMITIDO,
         )
+
+    @property
+    def enlace_whatsapp(self):
+        """Enlace wa.me para enviar el mensaje desde WhatsApp sin la API (números de Colombia)."""
+        from urllib.parse import quote
+
+        numero = ''.join(ch for ch in self.destinatario if ch.isdigit())
+        if not numero:
+            return ''
+        if len(numero) == 10:
+            numero = '57' + numero
+        return f'https://wa.me/{numero}?text={quote(self.contenido)}'
 
 
 class SolicitudStock(models.Model):

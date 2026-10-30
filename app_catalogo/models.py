@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.core.validators import FileExtensionValidator
 from django.db import models
 
 
@@ -41,7 +42,11 @@ class Producto(models.Model):
     precio_compra = models.DecimalField(max_digits=10, decimal_places=2)
     porcentaje_ganancia = models.DecimalField(max_digits=5, decimal_places=2, default=30)
     precio_venta = models.DecimalField(max_digits=10, decimal_places=2, editable=False, default=0)
-    imagen = models.FileField(upload_to='productos/', blank=True, null=True)
+    imagen = models.FileField(
+        upload_to='productos/', blank=True, null=True,
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'webp', 'gif'])],
+        help_text='Formatos: JPG, PNG, WEBP o GIF.',
+    )
     visible = models.BooleanField(default=True)
     veces_vendido = models.PositiveIntegerField(default=0)
     fecha_registro = models.DateTimeField(auto_now_add=True)

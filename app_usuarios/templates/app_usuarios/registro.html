@@ -1,13 +1,39 @@
 {% extends 'base.html' %}
-{% block titulo %}Registrarse{% endblock %}
+{% block titulo %}Crear cuenta{% endblock %}
 {% block contenido %}
-<div class="tarjeta formulario" style="margin:0 auto">
-    <h1>Crear cuenta</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Registrarme</button>
-    </form>
-    <p style="margin-top:15px">¿Ya tienes cuenta? <a href="{% url 'usuarios:login' %}">Inicia sesión</a></p>
+<div class="auth">
+    <div class="auth-lado">
+        <h2>Crea tu cuenta</h2>
+        <p>Compra en minutos y sigue tus pedidos desde cualquier lugar.</p>
+        <ul>
+            <li><i class="bi bi-check2-circle"></i>Guarda tus direcciones de envío</li>
+            <li><i class="bi bi-check2-circle"></i>Recibe el estado de tus pedidos</li>
+            <li><i class="bi bi-check2-circle"></i>Promociones y beneficios VIP</li>
+            <li><i class="bi bi-check2-circle"></i>Pide pijamas personalizadas</li>
+        </ul>
+    </div>
+    <div class="auth-formulario">
+        <h1>Registro</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <p><label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>{{ form.username.errors }}{{ form.username }}</p>
+            <div class="campos-2">
+                <p><label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>{{ form.first_name.errors }}{{ form.first_name }}</p>
+                <p><label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>{{ form.last_name.errors }}{{ form.last_name }}</p>
+            </div>
+            <div class="campos-2">
+                <p><label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>{{ form.email.errors }}{{ form.email }}</p>
+                <p><label for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>{{ form.telefono.errors }}{{ form.telefono }}</p>
+            </div>
+            <div class="campos-2">
+                <p><label for="{{ form.password1.id_for_label }}">Contraseña</label>{{ form.password1.errors }}{{ form.password1 }}</p>
+                <p><label for="{{ form.password2.id_for_label }}">Confirmar contraseña</label>{{ form.password2.errors }}{{ form.password2 }}</p>
+            </div>
+            <p class="ayuda">Mínimo 8 caracteres; no uses solo números ni contraseñas comunes.</p>
+            <button type="submit"><i class="bi bi-person-plus"></i> Crear mi cuenta</button>
+        </form>
+        <p class="centrado" style="margin-top:18px">¿Ya tienes cuenta? <a href="{% url 'usuarios:login' %}">Inicia sesión</a></p>
+    </div>
 </div>
 {% endblock %}

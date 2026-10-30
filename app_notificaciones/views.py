@@ -21,13 +21,16 @@ class CampanaForm(forms.Form):
         ('vip', 'Solo clientes VIP'),
         ('inactivos', 'Clientes inactivos'),
     ]
-    segmento = forms.ChoiceField(choices=SEGMENTOS)
-    mensaje = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), max_length=1000,
+    segmento = forms.ChoiceField(label='Destinatarios', choices=SEGMENTOS, widget=forms.RadioSelect, initial='todos')
+    asunto = forms.CharField(label='Asunto', max_length=120,
+                             widget=forms.TextInput(attrs={'placeholder': 'Ej: ¡Nueva colección navideña!'}))
+    mensaje = forms.CharField(widget=forms.Textarea(attrs={'rows': 6}), max_length=1000,
                               help_text='Puedes usar {nombre} para personalizar el mensaje.')
 
 
 def _clientes_segmento(segmento):
-    clientes = Cliente.objects.filter(notificaciones_whatsapp=True, usuario__is_active=True).select_related('usuario')
+    """Clientes activos del segmento. Todos reciben el mensaje en su bandeja; WhatsApp respeta su preferencia."""
+    clientes = Cliente.objects.filter(usuario__is_active=True).select_related('usuario')
     if segmento == 'vip':
         return clientes.filter(es_vip=True)
     if segmento == 'inactivos':
@@ -50,12 +53,14 @@ def whatsapp_masivo(request):
     form = CampanaForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         clientes = _clientes_segmento(form.cleaned_data['segmento'])
+        asunto = form.cleaned_data['asunto']
         for cliente in clientes:
             texto = form.cleaned_data['mensaje'].replace('{nombre}', cliente.nombre)
-            Notificacion.enviar(cliente, Notificacion.TIPO_CAMPANA, texto)
-        messages.success(request, f'Campaña enviada a {clientes.count()} cliente(s).')
+            Notificacion.enviar(cliente, Notificacion.TIPO_CAMPANA, texto, asunto)
+        messages.success(request, f'Mensaje enviado a {clientes.count()} cliente(s). Ya lo pueden ver en su bandeja.')
         return redirect('notificaciones:lista')
-    return render(request, 'app_notificaciones/masivo.html', {'form': form})
+    conteos = {clave: _clientes_segmento(clave).count() for clave, _ in CampanaForm.SEGMENTOS}
+    return render(request, 'app_notificaciones/masivo.html', {'form': form, 'conteos': conteos})
 
 
 @cliente_requerido
@@ -69,6 +74,7 @@ def solicitar_stock(request, producto_id):
 
 @cliente_requerido
 def mis_notificaciones(request):
-    return render(request, 'app_notificaciones/mis_notificaciones.html', {
-        'notificaciones': request.user.cliente.notificaciones.all()[:50],
-    })
+    notificaciones = list(request.user.cliente.notificaciones.all()[:50])
+    # Se muestran resaltados los nuevos y quedan marcados como leídos
+    request.user.cliente.notificaciones.filter(leida=False).update(leida=True)
+    return render(request, 'app_notificaciones/mis_notificaciones.html', {'notificaciones': notificaciones})

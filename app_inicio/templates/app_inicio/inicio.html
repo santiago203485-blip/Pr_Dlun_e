@@ -1,31 +1,49 @@
 {% extends 'base.html' %}
-{% block titulo %}Inicio{% endblock %}
+{% block titulo %}Pijamas con estampados{% endblock %}
 {% block contenido %}
 <section class="portada">
-    <h1>Pijamas que te hacen soñar 🌙</h1>
-    <p>Diseños con estampados para mujer, hombre y niños. También personalizamos tu pijama.</p>
-    <a href="{% url 'catalogo:catalogo' %}" class="btn">Ver catálogo</a>
-    {% if not user.is_authenticated %}
-        <a href="{% url 'usuarios:registro' %}" class="btn">Crear cuenta</a>
-    {% endif %}
+    <div>
+        <h1>Pijamas que te hacen soñar</h1>
+        <p>Diseños con estampados para mujer, hombre y niños. Telas suaves, tallas para todos y la opción de personalizar tu propia pijama.</p>
+        <a href="{% url 'catalogo:catalogo' %}" class="btn btn-grande"><i class="bi bi-bag-heart"></i> Ver catálogo</a>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'usuarios:registro' %}" class="btn btn-grande btn-borde">Crear cuenta</a>
+        {% else %}
+            <a href="{% url 'personalizacion:mis_disenos' %}" class="btn btn-grande btn-borde">Personalizar</a>
+        {% endif %}
+    </div>
+    <div class="portada-tarjetas">
+        <div><i class="bi bi-truck"></i><span>Domicilio en Medellín y Envigado</span></div>
+        <div><i class="bi bi-shield-check"></i><span>Pago seguro o contra entrega</span></div>
+        <div><i class="bi bi-palette"></i><span>Estampados personalizados</span></div>
+    </div>
 </section>
 
-{% if categorias %}
 <div class="categorias-chips">
     <a class="chip" href="{% url 'catalogo:catalogo' %}?genero=mujer">👩 Mujer</a>
     <a class="chip" href="{% url 'catalogo:catalogo' %}?genero=hombre">👨 Hombre</a>
     <a class="chip" href="{% url 'catalogo:catalogo' %}?genero=infantil">🧒 Infantil</a>
     {% for c in categorias %}<a class="chip" href="{% url 'catalogo:catalogo' %}?categoria={{ c.id }}">{{ c.nombre }}</a>{% endfor %}
 </div>
+
+<div class="titulo-seccion">
+    <h2>Más vendidos</h2>
+    <a href="{% url 'catalogo:catalogo' %}">Ver todo <i class="bi bi-arrow-right"></i></a>
+</div>
+<div class="grid">
+    {% for p in destacados %}{% include 'includes/tarjeta_producto.html' %}{% empty %}<p class="texto-gris">Pronto tendremos productos para ti.</p>{% endfor %}
+</div>
+
+{% if nuevos %}
+<div class="titulo-seccion"><h2>Novedades</h2></div>
+<div class="grid">
+    {% for p in nuevos %}{% include 'includes/tarjeta_producto.html' with nuevo=True %}{% endfor %}
+</div>
 {% endif %}
 
-<h2>Más vendidos</h2>
-<div class="grid">
-    {% for p in destacados %}{% include 'includes/tarjeta_producto.html' %}{% empty %}<p class="texto-gris">Aún no hay productos.</p>{% endfor %}
-</div>
-
-<h2 style="margin-top:30px">Novedades</h2>
-<div class="grid">
-    {% for p in nuevos %}{% include 'includes/tarjeta_producto.html' %}{% endfor %}
-</div>
+<section class="beneficios">
+    <div><i class="bi bi-stars"></i><div><strong>Clientes VIP</strong>Beneficios especiales para quienes más nos compran.</div></div>
+    <div><i class="bi bi-whatsapp"></i><div><strong>Te avisamos</strong>Recibe el estado de tu pedido y nuestras promociones.</div></div>
+    <div><i class="bi bi-arrow-repeat"></i><div><strong>Avísame cuando llegue</strong>Si una pijama se agota, te notificamos al reponerla.</div></div>
+</section>
 {% endblock %}

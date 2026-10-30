@@ -1,12 +1,15 @@
 {% load dlune %}
 <div class="producto">
     <a href="{% url 'catalogo:detalle' p.pk %}" class="imagen">
-        {% if p.imagen %}<img src="{{ p.imagen.url }}" alt="{{ p.nombre }}">{% else %}🌙{% endif %}
+        {% if p.imagen %}<img src="{{ p.imagen.url }}" alt="{{ p.nombre }}" loading="lazy">{% else %}🌙{% endif %}
+        <span class="insignia">
+            {% if p.agotado %}<span class="etiqueta error">Agotado</span>
+            {% elif nuevo %}<span class="etiqueta nuevo">Nuevo</span>{% endif %}
+        </span>
     </a>
     <div class="info">
-        <a href="{% url 'catalogo:detalle' p.pk %}" class="nombre">{{ p.nombre }}</a>
         <small class="texto-gris">{{ p.categoria }} · {{ p.get_genero_display }}</small>
+        <a href="{% url 'catalogo:detalle' p.pk %}" class="nombre">{{ p.nombre }}</a>
         <span class="precio">{{ p.precio_venta|pesos }}</span>
-        {% if p.agotado %}<span class="etiqueta error">Agotado</span>{% else %}<span class="etiqueta ok">Disponible</span>{% endif %}
     </div>
 </div>

@@ -17,16 +17,22 @@
 
 <div class="tabla-contenedor">
 <table>
-    <thead><tr><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Tipo</th><th>Mensaje</th><th>Estado</th></tr></thead>
+    <thead><tr><th>Fecha</th><th>Cliente</th><th>Tipo</th><th>Mensaje</th><th>Leído</th><th>WhatsApp</th></tr></thead>
     <tbody>
     {% for n in notificaciones %}
         <tr>
-            <td>{{ n.fecha_envio|date:"d/m/Y H:i" }}</td><td>{{ n.cliente.nombre }}</td><td>{{ n.destinatario|default:"—" }}</td>
-            <td>{{ n.get_tipo_display }}</td><td>{{ n.contenido|truncatechars:80 }}</td>
-            <td><span class="etiqueta {% if n.estado_envio == 'enviado' %}ok{% endif %}">{{ n.get_estado_envio_display }}</span></td>
+            <td>{{ n.fecha_envio|date:"d/m/Y H:i" }}</td><td>{{ n.cliente.nombre }}</td>
+            <td>{{ n.get_tipo_display }}</td>
+            <td>{% if n.asunto %}<strong>{{ n.asunto }}</strong><br>{% endif %}{{ n.contenido|truncatechars:80 }}</td>
+            <td>{% if n.leida %}<span class="etiqueta ok">Leído</span>{% else %}<span class="etiqueta">Sin leer</span>{% endif %}</td>
+            <td>
+                {% if n.estado_envio == 'enviado' and n.enlace_whatsapp %}
+                    <a href="{{ n.enlace_whatsapp }}" target="_blank" rel="noopener" class="btn btn-pequeno btn-exito"><i class="bi bi-whatsapp"></i> Enviar</a>
+                {% else %}<span class="texto-gris">{{ n.get_estado_envio_display }}</span>{% endif %}
+            </td>
         </tr>
     {% empty %}
-        <tr><td colspan="6" class="centrado texto-gris">Sin notificaciones.</td></tr>
+        <tr><td colspan="6" class="centrado texto-gris">Sin mensajes enviados.</td></tr>
     {% endfor %}
     </tbody>
 </table>

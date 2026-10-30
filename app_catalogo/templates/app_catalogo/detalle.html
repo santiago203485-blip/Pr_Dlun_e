@@ -2,14 +2,14 @@
 {% load dlune %}
 {% block titulo %}{{ producto.nombre }}{% endblock %}
 {% block contenido %}
-<p><a href="{% url 'catalogo:catalogo' %}">← Volver al catálogo</a></p>
+<p><a href="{% url 'catalogo:catalogo' %}"><i class="bi bi-arrow-left"></i> Volver al catálogo</a></p>
 <div class="detalle-producto tarjeta">
-    <div class="producto" style="border:none">
-        <div class="imagen">{% if producto.imagen %}<img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">{% else %}🌙{% endif %}</div>
+    <div class="imagen-grande">
+        {% if producto.imagen %}<img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">{% else %}🌙{% endif %}
     </div>
     <div>
+        <p class="texto-gris">{{ producto.categoria }} · {{ producto.get_genero_display }} · Ref. {{ producto.codigo }}</p>
         <h1>{{ producto.nombre }}</h1>
-        <p class="texto-gris">{{ producto.categoria }} · {{ producto.get_genero_display }} · Código {{ producto.codigo }}</p>
         <p class="precio">{{ producto.precio_venta|pesos }}</p>
         <p>{{ producto.descripcion|linebreaksbr }}</p>
 
@@ -18,13 +18,15 @@
             {% if user.is_authenticated and user.es_cliente %}
                 <form method="post" action="{% url 'notificaciones:solicitar_stock' producto.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="btn-secundario">🔔 Avísame cuando llegue</button>
+                    <button type="submit" class="btn-secundario"><i class="bi bi-bell"></i> Avísame cuando llegue</button>
                 </form>
+            {% elif not user.is_authenticated %}
+                <a href="{% url 'usuarios:login' %}?next={{ request.path }}" class="btn btn-secundario"><i class="bi bi-bell"></i> Ingresa para que te avisemos</a>
             {% endif %}
         {% else %}
-            <p><span class="etiqueta ok">Disponible</span> <small class="texto-gris">{{ producto.stock }} unidades</small></p>
+            <p><span class="etiqueta ok"><i class="bi bi-check2"></i> Disponible</span> <small class="texto-gris">{{ producto.stock }} unidades</small></p>
             {% if user.is_authenticated and not user.es_cliente %}
-                <p class="texto-gris">Inicia sesión como cliente para comprar.</p>
+                <p class="texto-gris">Estás viendo la tienda como personal de Dlune.</p>
             {% else %}
                 <form method="post" action="{% url 'carrito:agregar' producto.pk %}">
                     {% csrf_token %}
@@ -33,15 +35,18 @@
                         <div><label>Color</label>{{ form.color }}</div>
                         <div><label>Cantidad</label>{{ form.cantidad }}</div>
                     </div>
-                    <button type="submit">🛒 Agregar al carrito</button>
+                    <button type="submit" class="btn-grande"><i class="bi bi-bag-plus"></i> Agregar al carrito</button>
                 </form>
             {% endif %}
         {% endif %}
+        <div class="beneficios" style="margin-top:24px">
+            <div><i class="bi bi-truck"></i><div><strong>Envío a domicilio</strong>O retíralo gratis en tienda.</div></div>
+        </div>
     </div>
 </div>
 
 {% if relacionados %}
-<h2>También te puede gustar</h2>
+<div class="titulo-seccion"><h2>También te puede gustar</h2></div>
 <div class="grid">{% for p in relacionados %}{% include 'includes/tarjeta_producto.html' %}{% endfor %}</div>
 {% endif %}
 {% endblock %}

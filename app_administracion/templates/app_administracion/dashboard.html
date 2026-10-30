@@ -2,32 +2,23 @@
 {% load dlune %}
 {% block titulo %}Panel de administración{% endblock %}
 {% block contenido %}
-<h1>Panel de administración</h1>
-
-<div class="estadisticas">
-    <div class="estadistica"><div class="valor">{{ ventas_hoy|pesos }}</div><div class="etiqueta">Ventas hoy</div></div>
-    <div class="estadistica"><div class="valor">{{ ventas_mes|pesos }}</div><div class="etiqueta">Ventas del mes</div></div>
-    <div class="estadistica"><div class="valor">{{ total_clientes }}</div><div class="etiqueta">Clientes ({{ total_vip }} VIP)</div></div>
-    <div class="estadistica" style="border-color:var(--alerta)"><div class="valor">{{ pedidos_pendientes }}</div><div class="etiqueta">Pedidos pendientes</div></div>
+<div class="cabecera">
+    <div>
+        <h1>Hola, {{ user.first_name|default:user.username }} 👋</h1>
+        <p class="texto-gris" style="margin:0">Así va tu tienda hoy.</p>
+    </div>
+    <div class="acciones">
+        <a class="btn" href="{% url 'catalogo:producto_nuevo' %}"><i class="bi bi-plus-circle"></i> Agregar producto</a>
+        <a class="btn btn-acento" href="{% url 'notificaciones:masivo' %}"><i class="bi bi-megaphone"></i> Mensaje a clientes</a>
+        <a class="btn btn-secundario" href="{% url 'ventas:nueva' %}"><i class="bi bi-cash-coin"></i> Nueva venta</a>
+    </div>
 </div>
 
-<div class="tarjeta">
-    <h3>Accesos rápidos</h3>
-    <div class="acciones">
-        <a class="btn" href="{% url 'catalogo:productos' %}">Productos</a>
-        <a class="btn" href="{% url 'catalogo:categorias' %}">Categorías</a>
-        <a class="btn" href="{% url 'ventas:nueva' %}">Nueva venta</a>
-        <a class="btn" href="{% url 'pedidos:gestion' %}">Pedidos</a>
-        <a class="btn" href="{% url 'pagos:lista' %}">Pagos</a>
-        <a class="btn" href="{% url 'clientes:lista' %}">Clientes</a>
-        <a class="btn" href="{% url 'notificaciones:masivo' %}">WhatsApp masivo</a>
-        <a class="btn" href="{% url 'personalizacion:gestion' %}">Diseños</a>
-        <a class="btn btn-secundario" href="{% url 'administracion:usuarios' %}">Usuarios</a>
-        <a class="btn btn-secundario" href="{% url 'domicilios:zonas' %}">Zonas domicilio</a>
-        <a class="btn btn-secundario" href="{% url 'domicilios:entregas' %}">Entregas</a>
-        <a class="btn btn-secundario" href="{% url 'pagos:cupones' %}">Cupones</a>
-        <a class="btn btn-secundario" href="{% url 'administracion:configuracion' %}">Configuración</a>
-    </div>
+<div class="estadisticas">
+    <div class="estadistica"><div class="valor">{{ ventas_hoy|pesos }}</div><div class="etiqueta"><i class="bi bi-calendar-day"></i> Ventas hoy</div></div>
+    <div class="estadistica" style="border-color:var(--acento-oscuro)"><div class="valor">{{ ventas_mes|pesos }}</div><div class="etiqueta"><i class="bi bi-graph-up"></i> Ventas del mes</div></div>
+    <div class="estadistica" style="border-color:var(--exito)"><div class="valor">{{ total_clientes }}</div><div class="etiqueta"><i class="bi bi-people"></i> Clientes ({{ total_vip }} VIP)</div></div>
+    <div class="estadistica" style="border-color:var(--alerta)"><div class="valor">{{ pedidos_pendientes }}</div><div class="etiqueta"><i class="bi bi-hourglass-split"></i> Pedidos pendientes</div></div>
 </div>
 
 <div class="grid-2">

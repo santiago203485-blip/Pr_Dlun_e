@@ -1,14 +1,25 @@
 {% extends 'base.html' %}
 {% block titulo %}Iniciar sesión{% endblock %}
 {% block contenido %}
-<div class="tarjeta formulario" style="margin:0 auto">
-    <h1>Iniciar sesión</h1>
-    <form method="post">
-        {% csrf_token %}
-        <p><label for="id_username">Usuario</label>{{ form.username }}</p>
-        <p><label for="id_password">Contraseña</label>{{ form.password }}</p>
-        <button type="submit">Ingresar</button>
-    </form>
-    <p style="margin-top:15px">¿No tienes cuenta? <a href="{% url 'usuarios:registro' %}">Regístrate</a></p>
+<div class="auth">
+    <div class="auth-lado">
+        <h2>Bienvenido a Dlune 🌙</h2>
+        <p>Un solo acceso para clientes y personal de la tienda. Según tu cuenta verás:</p>
+        <ul>
+            <li><i class="bi bi-bag-heart"></i><span><strong>Clientes:</strong> catálogo, carrito, pedidos y mensajes de la tienda.</span></li>
+            <li><i class="bi bi-speedometer2"></i><span><strong>Administrador:</strong> panel con productos, pedidos, clientes, mensajes y reportes.</span></li>
+            <li><i class="bi bi-person-badge"></i><span><strong>Vendedor, bodega y repartidor:</strong> sus herramientas de trabajo.</span></li>
+        </ul>
+    </div>
+    <div class="auth-formulario">
+        <h1>Iniciar sesión</h1>
+        <form method="post">
+            {% csrf_token %}
+            <p><label for="id_username">Usuario</label>{{ form.username }}</p>
+            <p><label for="id_password">Contraseña</label>{{ form.password }}</p>
+            <button type="submit"><i class="bi bi-box-arrow-in-right"></i> Ingresar</button>
+        </form>
+        <p class="centrado" style="margin-top:18px">¿Aún no tienes cuenta? <a href="{% url 'usuarios:registro' %}">Regístrate gratis</a></p>
+    </div>
 </div>
 {% endblock %}

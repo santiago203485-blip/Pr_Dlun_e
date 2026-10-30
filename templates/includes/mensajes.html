@@ -1,0 +1,10 @@
+{% if messages %}
+    <ul class="mensajes">
+        {% for message in messages %}
+            <li class="{{ message.tags }}">
+                {% if message.tags == 'success' %}<i class="bi bi-check-circle"></i>{% elif message.tags == 'error' %}<i class="bi bi-x-circle"></i>{% elif message.tags == 'warning' %}<i class="bi bi-exclamation-triangle"></i>{% else %}<i class="bi bi-info-circle"></i>{% endif %}
+                {{ message }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}

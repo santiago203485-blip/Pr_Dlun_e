@@ -22,7 +22,12 @@ class ProductoForm(forms.ModelForm):
             'genero': 'Género', 'stock_minimo': 'Stock mínimo de alerta',
             'porcentaje_ganancia': '% de ganancia', 'visible': 'Visible en catálogo',
         }
-        widgets = {'descripcion': forms.Textarea(attrs={'rows': 3})}
+        widgets = {
+            'descripcion': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Tela, estampado, recomendaciones de lavado...'}),
+            'imagen': forms.ClearableFileInput(attrs={'accept': 'image/*'}),
+            'tallas': forms.TextInput(attrs={'placeholder': 'S,M,L,XL'}),
+            'colores': forms.TextInput(attrs={'placeholder': 'Negro,Blanco,Rosa'}),
+        }
 
 
 class AgregarCarritoForm(forms.Form):

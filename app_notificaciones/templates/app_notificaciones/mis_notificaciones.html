@@ -1,13 +1,20 @@
 {% extends 'base.html' %}
 {% block titulo %}Mis mensajes{% endblock %}
 {% block contenido %}
-<h1>Mis mensajes</h1>
+<h1><i class="bi bi-envelope"></i> Mis mensajes</h1>
 {% for n in notificaciones %}
-    <div class="tarjeta">
-        <small class="texto-gris">{{ n.fecha_envio|date:"d/m/Y H:i" }} · {{ n.get_tipo_display }}</small>
-        <p style="margin:5px 0 0">{{ n.contenido }}</p>
+    <div class="tarjeta mensaje-tienda{% if not n.leida %} nuevo{% endif %}">
+        <div class="icono-mensaje">
+            {% if n.tipo == 'campana' %}<i class="bi bi-megaphone"></i>{% elif n.tipo == 'stock' %}<i class="bi bi-bag-check"></i>{% else %}<i class="bi bi-receipt"></i>{% endif %}
+        </div>
+        <div>
+            <small class="texto-gris">{{ n.fecha_envio|date:"d/m/Y H:i" }} · {{ n.get_tipo_display }}</small>
+            {% if not n.leida %}<span class="etiqueta nuevo">Nuevo</span>{% endif %}
+            {% if n.asunto %}<h3 style="margin:4px 0">{{ n.asunto }}</h3>{% endif %}
+            <p style="margin:4px 0 0">{{ n.contenido|linebreaksbr }}</p>
+        </div>
     </div>
 {% empty %}
-    <p class="texto-gris">No tienes mensajes.</p>
+    <div class="tarjeta vacio"><i class="bi bi-envelope-open"></i>No tienes mensajes por ahora.</div>
 {% endfor %}
 {% endblock %}
