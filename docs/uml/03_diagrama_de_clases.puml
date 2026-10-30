@@ -64,7 +64,7 @@ enum Estado_Venta {
 enum Tipo_Notificacion {
   Confirmacion_Pedido
   Cambio_Estado
-  Campana_Masiva
+  Mensaje_Tienda
   Producto_Disponible
 }
 
@@ -363,7 +363,10 @@ class Notificacion {
   -Contenido: TEXT
   -Fecha_Envio: DATETIME
   -Estado_Envio: Estado_Envio
-  +{static} Enviar(Cliente: Cliente, Tipo: Tipo_Notificacion, Contenido: TEXT): Notificacion
+  -Asunto: STRING
+  -Leida: BOOLEAN
+  +{static} Enviar(Cliente: Cliente, Tipo: Tipo_Notificacion, Contenido: TEXT, Asunto: STRING): Notificacion
+  +Obtener_Enlace_Whatsapp(): STRING
 }
 
 class Solicitud_Stock {

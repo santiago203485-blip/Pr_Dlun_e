@@ -29,7 +29,7 @@ def catalogo(request):
     productos = _filtrar(Producto.objects.filter(visible=True).select_related('categoria'), request)
     contexto = {
         'productos': productos,
-        'categorias': Categoria.objects.all(),
+        'categorias': Categoria.objects.filter(productos__visible=True).distinct(),
         'generos': Producto.GENEROS,
     }
     return render(request, 'app_catalogo/catalogo.html', contexto)

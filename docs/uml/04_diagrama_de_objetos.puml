@@ -1,7 +1,7 @@
 @startuml Diagrama_De_Objetos_Dlune
 ' Instantánea de una compra en línea con los datos de prueba del proyecto (comando datos_demo)
-' Valores: pijama PJ-001 (precio compra 45.000 + 60% = 72.000), cupón DLUNE10 (10%), impuesto 19%, domicilio Medellín 8.000
-' Total = 72.000 - 7.200 + 12.312 + 8.000 = 85.112
+' Valores: pijama DL-001 (precio compra 50.000 + 60% = 80.000), cupón DLUNE10 (10%), impuesto 19%, domicilio Medellín 8.000
+' Total = 80.000 - 8.000 + 13.680 + 8.000 = 93.680
 
 object "Cliente1 : Cliente" as Cliente1 {
   Id_Usuario = 5
@@ -11,27 +11,27 @@ object "Cliente1 : Cliente" as Cliente1 {
   Email = "cliente@dlune.test"
   Rol = Cliente
   Total_Compras = 1
-  Total_Gastado = 85112
+  Total_Gastado = 93680
   Es_Vip = false
   Notificaciones_Whatsapp = true
 }
 
 object "Categoria1 : Categoria" as Categoria1 {
   Id_Categoria = 1
-  Nombre = "Navideña"
+  Nombre = "Algodón clásico"
 }
 
 object "Pijama1 : Producto" as Pijama1 {
   Id_Producto = 1
-  Codigo = "PJ-001"
-  Nombre = "Pijama Luna Estrellada"
+  Codigo = "DL-001"
+  Nombre = "Pijama Noche de Estrellas"
   Genero = Mujer
   Tallas = "S,M,L,XL"
-  Colores = "Azul,Negro"
-  Stock = 19
-  Precio_Compra = 45000
+  Colores = "Azul noche,Rosa"
+  Stock = 17
+  Precio_Compra = 50000
   Porcentaje_Ganancia = 60
-  Precio_Venta = 72000
+  Precio_Venta = 80000
 }
 
 object "Direccion1 : Direccion" as Direccion1 {
@@ -48,11 +48,11 @@ object "Pedido1 : Pedido" as Pedido1 {
   Metodo_Pago = Tarjeta
   Tipo_Entrega = Domicilio
   Horario_Entrega = "8:00 - 12:00"
-  Subtotal = 72000
-  Descuento = 7200
-  Impuesto = 12312
+  Subtotal = 80000
+  Descuento = 8000
+  Impuesto = 13680
   Costo_Domicilio = 8000
-  Total = 85112
+  Total = 93680
   Cupon = "DLUNE10"
 }
 
@@ -60,14 +60,14 @@ object "Detalle1 : Detalle_Pedido" as Detalle1 {
   Id_Detalle = 1
   Cantidad = 1
   Talla = "M"
-  Color = "Negro"
-  Precio_Unitario = 72000
-  Subtotal = 72000
+  Color = "Rosa"
+  Precio_Unitario = 80000
+  Subtotal = 80000
 }
 
 object "Pago1 : Pago" as Pago1 {
   Id_Pago = 1
-  Monto = 85112
+  Monto = 93680
   Metodo = Tarjeta
   Estado = Aprobado
   Id_Transaccion_Externo = "A1B2C3D4E5F6A7B8"

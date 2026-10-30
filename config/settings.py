@@ -91,6 +91,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'app_carrito.context_processors.carrito',
+                'app_administracion.context_processors.tienda',
             ],
         },
     },

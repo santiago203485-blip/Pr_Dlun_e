@@ -1,12 +1,27 @@
 {% extends 'base.html' %}
 {% block titulo %}Configuración{% endblock %}
 {% block contenido %}
-<div class="tarjeta formulario">
-    <h1>⚙️ Configuración de la tienda</h1>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Guardar</button>
-    </form>
+<div class="cabecera">
+    <h1><i class="bi bi-gear"></i> Configuración de la tienda</h1>
+    <a href="{% url 'inicio:inicio' %}" target="_blank" class="btn btn-secundario"><i class="bi bi-eye"></i> Ver la tienda</a>
 </div>
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="grid-2">
+        {% for titulo, campos in form.grupos %}
+            <div class="tarjeta">
+                <h3>{{ titulo }}</h3>
+                {% for campo in campos %}
+                    <p>
+                        <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                        {{ campo.errors }}{{ campo }}
+                        {% if campo.help_text %}<span class="ayuda">{{ campo.help_text }}</span>{% endif %}
+                    </p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    <button type="submit" class="btn-grande"><i class="bi bi-check2"></i> Guardar configuración</button>
+</form>
 {% endblock %}

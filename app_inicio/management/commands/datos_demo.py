@@ -1,10 +1,10 @@
 import os
 
 from django.conf import settings
+from django.core.management import call_command
 from django.core.management.base import BaseCommand
 
 from app_administracion.models import ConfiguracionTienda
-from app_catalogo.models import Categoria, Producto
 from app_clientes.models import Cliente
 from app_domicilios.models import Direccion, ZonaDomicilio
 from app_pagos.models import Cupon
@@ -21,20 +21,10 @@ USUARIOS = [
     ('cliente', 'María', 'López', 'cliente'),
 ]
 
-PRODUCTOS = [
-    ('PJ-001', 'Pijama Luna Estrellada', 'Navideña', 'mujer', 45000, 'Azul,Negro'),
-    ('PJ-002', 'Pijama Ositos Polares', 'Invierno', 'infantil', 30000, 'Blanco,Rosa'),
-    ('PJ-003', 'Pijama Clásica Cuadros', 'Invierno', 'hombre', 50000, 'Rojo,Gris'),
-    ('PJ-004', 'Short Tropical', 'Verano', 'mujer', 28000, 'Verde,Amarillo'),
-    ('PJ-005', 'Pijama Dinosaurios', 'Estampados animales', 'infantil', 32000, 'Verde,Azul'),
-    ('PJ-006', 'Pijama Gatitos', 'Estampados animales', 'mujer', 42000, 'Rosa,Lila'),
-    ('PJ-007', 'Pijama Renos', 'Navideña', 'hombre', 48000, 'Rojo,Verde'),
-    ('PJ-008', 'Bermuda Palmeras', 'Verano', 'hombre', 26000, 'Azul,Blanco'),
-]
 
 
 class Command(BaseCommand):
-    help = 'Crea usuarios, categorías, productos y cupones de prueba para Dlune.'
+    help = 'Crea usuarios de prueba, zonas, cupón y el catálogo inicial de Dlune.'
 
     def handle(self, *args, **opciones):
         ConfiguracionTienda.obtener()
@@ -72,15 +62,6 @@ class Command(BaseCommand):
         ZonaDomicilio.objects.get_or_create(ciudad='Envigado', barrio='', defaults={'costo': 10000})
         Cupon.objects.get_or_create(codigo='DLUNE10', defaults={'porcentaje': 10})
 
-        for i, (codigo, nombre, categoria, genero, precio, colores) in enumerate(PRODUCTOS):
-            cat, _ = Categoria.objects.get_or_create(nombre=categoria)
-            Producto.objects.get_or_create(
-                codigo=codigo,
-                defaults={
-                    'nombre': nombre, 'categoria': cat, 'genero': genero, 'precio_compra': precio,
-                    'porcentaje_ganancia': 60, 'colores': colores, 'stock': [20, 3, 15, 0, 12, 8, 4, 25][i],
-                    'descripcion': f'{nombre} en algodón suave, ideal para dormir cómodo.',
-                },
-            )
+        call_command('cargar_catalogo', verbosity=0, stdout=self.stdout)
 
         self.stdout.write(self.style.SUCCESS('Datos de prueba listos.'))

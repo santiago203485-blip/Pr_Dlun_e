@@ -1,7 +1,8 @@
+import tempfile
 from unittest import mock
 
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from app_catalogo.models import Producto
@@ -10,6 +11,7 @@ from app_usuarios.models import Usuario
 from app_ventas.models import Venta
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class FlujoCompraTest(TestCase):
     """Recorre el diagrama de actividades: login -> catálogo -> carrito -> pedido -> pago."""
 
@@ -20,11 +22,11 @@ class FlujoCompraTest(TestCase):
 
     def test_compra_completa_con_reintento_de_pago(self):
         self.client.login(username='cliente', password='dlune1234')
-        producto = Producto.objects.get(codigo='PJ-001')
+        producto = Producto.objects.get(codigo='DL-001')
         stock_inicial = producto.stock
 
         self.assertEqual(self.client.get(reverse('catalogo:catalogo'), {'genero': 'mujer'}).status_code, 200)
-        self.client.post(reverse('carrito:agregar', args=[producto.pk]), {'talla': 'M', 'color': 'Azul', 'cantidad': 2})
+        self.client.post(reverse('carrito:agregar', args=[producto.pk]), {'talla': 'M', 'color': 'Azul noche', 'cantidad': 2})
 
         cliente = Usuario.objects.get(username='cliente').cliente
         respuesta = self.client.post(reverse('pedidos:checkout'), {
@@ -53,7 +55,7 @@ class FlujoCompraTest(TestCase):
 
     def test_cancelar_pedido_devuelve_stock(self):
         self.client.login(username='cliente', password='dlune1234')
-        producto = Producto.objects.get(codigo='PJ-003')
+        producto = Producto.objects.get(codigo='DL-005')
         self.client.post(reverse('carrito:agregar', args=[producto.pk]), {'talla': 'L', 'color': 'Rojo', 'cantidad': 1})
         self.client.post(reverse('pedidos:checkout'), {
             'tipo_entrega': 'tienda', 'horario_entrega': '8:00 - 12:00', 'metodo_pago': 'nequi',
@@ -66,6 +68,7 @@ class FlujoCompraTest(TestCase):
         self.assertEqual(producto.stock, 15)
 
 
+@override_settings(MEDIA_ROOT=tempfile.mkdtemp())
 class VentaTiendaTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -74,7 +77,7 @@ class VentaTiendaTest(TestCase):
 
     def test_vendedor_registra_venta(self):
         self.client.login(username='vendedora', password='dlune1234')
-        producto = Producto.objects.get(codigo='PJ-008')
+        producto = Producto.objects.get(codigo='DL-007')
         datos = {'metodo_pago': 'efectivo', 'items-TOTAL_FORMS': 5, 'items-INITIAL_FORMS': 0,
                  'items-0-producto': producto.pk, 'items-0-cantidad': 3}
         respuesta = self.client.post(reverse('ventas:nueva'), datos)

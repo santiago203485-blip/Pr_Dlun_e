@@ -145,13 +145,20 @@
     <div class="contenedor pie-columnas">
         <div>
             <a href="{% url 'inicio:inicio' %}" class="logo">D<span>lune</span> 🌙</a>
-            <p>Pijamas con estampados para toda la familia. Diseños propios y personalizados.</p>
+            <p>{{ tienda.eslogan|default:"Pijamas con estampados para toda la familia." }}</p>
+            <div class="redes">
+                {% if tienda.instagram %}<a href="https://www.instagram.com/{{ tienda.instagram }}" target="_blank" rel="noopener" title="Instagram"><i class="bi bi-instagram"></i></a>{% endif %}
+                {% if tienda.facebook %}<a href="https://www.facebook.com/{{ tienda.facebook }}" target="_blank" rel="noopener" title="Facebook"><i class="bi bi-facebook"></i></a>{% endif %}
+                {% if tienda.tiktok %}<a href="https://www.tiktok.com/@{{ tienda.tiktok }}" target="_blank" rel="noopener" title="TikTok"><i class="bi bi-tiktok"></i></a>{% endif %}
+                {% if tienda.enlace_whatsapp %}<a href="{{ tienda.enlace_whatsapp }}" target="_blank" rel="noopener" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>{% endif %}
+            </div>
         </div>
         <div>
             <h4>Tienda</h4>
             <a href="{% url 'catalogo:catalogo' %}?genero=mujer">Mujer</a>
             <a href="{% url 'catalogo:catalogo' %}?genero=hombre">Hombre</a>
             <a href="{% url 'catalogo:catalogo' %}?genero=infantil">Infantil</a>
+            <a href="{% url 'personalizacion:mis_disenos' %}">Personaliza tu pijama</a>
         </div>
         <div>
             <h4>Mi cuenta</h4>
@@ -163,12 +170,17 @@
                 <a href="{% url 'usuarios:registro' %}">Crear cuenta</a>
             {% endif %}
         </div>
-        <div>
-            <h4>Pagos</h4>
-            <p class="metodos"><i class="bi bi-credit-card"></i> Tarjeta · Nequi · Daviplata · Transferencia · Contra entrega</p>
+        <div class="pie-contacto">
+            <h4>Contáctanos</h4>
+            {% if tienda.enlace_whatsapp %}<a href="{{ tienda.enlace_whatsapp }}" target="_blank" rel="noopener"><i class="bi bi-whatsapp"></i> {{ tienda.telefono_whatsapp }}</a>{% endif %}
+            {% if tienda.telefono_fijo %}<a href="tel:{{ tienda.telefono_fijo }}"><i class="bi bi-telephone"></i> {{ tienda.telefono_fijo }}</a>{% endif %}
+            {% if tienda.email_contacto %}<a href="mailto:{{ tienda.email_contacto }}"><i class="bi bi-envelope"></i> {{ tienda.email_contacto }}</a>{% endif %}
+            {% if tienda.direccion %}<p><i class="bi bi-geo-alt"></i> {{ tienda.direccion }}{% if tienda.ciudad %}, {{ tienda.ciudad }}{% endif %}</p>{% endif %}
+            {% if tienda.horario %}<p><i class="bi bi-clock"></i> {{ tienda.horario }}</p>{% endif %}
+            <p><i class="bi bi-credit-card"></i> Tarjeta · Nequi · Daviplata · Transferencia · Contra entrega</p>
         </div>
     </div>
-    <p class="pie-final">Dlune Pijamas &copy; {% now "Y" %}</p>
+    <p class="pie-final">{{ tienda.nombre_tienda }} &copy; {% now "Y" %}{% if tienda.nombre_responsable %} · {{ tienda.nombre_responsable }}{% endif %}</p>
 </footer>
 {% endif %}
 </body>
