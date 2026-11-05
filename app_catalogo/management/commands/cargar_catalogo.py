@@ -39,7 +39,9 @@ class Command(BaseCommand):
                 producto.save()
                 actualizados += 1
             imagen = IMAGENES / f'{codigo.lower()}.jpg'
-            if imagen.exists() and (not producto.imagen or (opciones['actualizar'] and not nuevo)):
+            # También se copia si el archivo se perdió (hosts con disco temporal, como Render)
+            falta_archivo = not producto.imagen or not producto.imagen.storage.exists(producto.imagen.name)
+            if imagen.exists() and (falta_archivo or (opciones['actualizar'] and not nuevo)):
                 with imagen.open('rb') as archivo:
                     producto.imagen.save(imagen.name, File(archivo), save=True)
 

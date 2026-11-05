@@ -170,6 +170,11 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    # HSTS solo cuando el dominio ya funciona con HTTPS (por ejemplo SECURE_HSTS_SECONDS=31536000)
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '0'))
+
+# El sistema no envía correos: se usa el backend de consola y se omite su aviso de producción
+SILENCED_SYSTEM_CHECKS = ['mail.E001']
 
 # Usuario personalizado y rutas de autenticación
 AUTH_USER_MODEL = 'app_usuarios.Usuario'
