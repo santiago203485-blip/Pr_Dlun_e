@@ -8,7 +8,8 @@ El proyecto queda listo para producción con variables de entorno (ver `.env.exa
 | `DEBUG` | `False` en producción |
 | `ALLOWED_HOSTS` | Dominio del sitio, por ejemplo `tuusuario.pythonanywhere.com` |
 | `DATABASE_URL` | Opcional. PostgreSQL; si no existe se usa SQLite |
-| `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_EMAIL` | Opcional. `python manage.py crear_admin` crea el administrador |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_EMAIL` | Opcional. `python manage.py crear_admin` crea el administrador (o le reasigna la clave si ya existe) |
+| `NTFY_TOPIC` | Opcional. Envía un aviso push al celular por cada pedido (app ntfy suscrita a ese tema) |
 | `DEMO_PASSWORD` | Opcional. Si existe, `datos_demo` crea los usuarios de prueba con esa clave |
 
 Los archivos estáticos los sirve WhiteNoise y las imágenes subidas las sirve Django (`SERVE_MEDIA=True`).

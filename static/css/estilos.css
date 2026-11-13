@@ -291,3 +291,13 @@ td.numero, th.numero { text-align: right; white-space: nowrap; }
     .campos-2 { grid-template-columns: 1fr; }
     .auth-formulario { padding: 30px 22px; }
 }
+
+/* Aviso de pedidos nuevos en el panel */
+.aviso-pedidos + .panel-usuario { margin-left: 0; }
+.aviso-pedidos { position: relative; margin-left: auto; font-size: 1.3rem; color: inherit; padding: 4px 10px; }
+.toasts-pedidos { position: fixed; right: 16px; bottom: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; max-width: calc(100vw - 32px); }
+.toast-pedido { display: flex; gap: 12px; align-items: center; background: #2d2346; color: #fff; padding: 14px 18px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: entrar-toast .3s ease-out; }
+.toast-pedido i { font-size: 1.5rem; color: #f5c66b; }
+.toast-pedido strong { display: block; }
+.toast-pedido span { font-size: .85rem; opacity: .85; }
+@keyframes entrar-toast { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }

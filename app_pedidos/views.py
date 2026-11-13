@@ -1,7 +1,13 @@
+import os
+import threading
+import urllib.request
+
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import F
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from app_carrito.models import Carrito
@@ -78,7 +84,29 @@ def _crear_pedido(request, cliente, carrito, items, datos):
         Pago.objects.create(pedido=pedido, monto=pedido.total, metodo='contra_entrega')
         pedido.cambiar_estado(Pedido.PENDIENTE_PAGO, request.user)
     carrito.vaciar_carrito()
+    transaction.on_commit(lambda: _avisar_tienda(pedido))
     return pedido
+
+
+def _avisar_tienda(pedido):
+    """Envía una notificación push al celular del administrador (ntfy.sh) si NTFY_TOPIC está definido."""
+    tema = os.environ.get('NTFY_TOPIC', '').strip()
+    if not tema:
+        return
+    mensaje = (f'{pedido.cliente} - ${pedido.total:,.0f} - {pedido.get_metodo_pago_display()} - '
+               f'{pedido.get_tipo_entrega_display()}').encode('utf-8')
+    peticion = urllib.request.Request(
+        f'https://ntfy.sh/{tema}', data=mensaje, method='POST',
+        headers={'Title': f'Nuevo pedido #{pedido.id}', 'Tags': 'shopping_cart', 'Priority': 'high'},
+    )
+
+    def enviar():
+        try:
+            urllib.request.urlopen(peticion, timeout=10)
+        except Exception:
+            pass  # El aviso nunca debe romper la compra
+
+    threading.Thread(target=enviar, daemon=True).start()
 
 
 @cliente_requerido
@@ -117,6 +145,23 @@ def gestion_lista(request):
     return render(request, 'app_pedidos/gestion_lista.html', {
         'pedidos': pedidos, 'estados': Pedido.ESTADOS, 'estado_actual': estado,
     })
+
+
+@gestion_pedidos
+def nuevos(request):
+    """Consulta periódica del panel: pedidos posteriores a `desde` y cantidad por atender."""
+    try:
+        desde = int(request.GET.get('desde', 0))
+    except ValueError:
+        desde = 0
+    pendientes = Pedido.objects.filter(estado__in=[Pedido.EN_PROCESO, Pedido.PENDIENTE_PAGO, Pedido.PAGADO]).count()
+    ultimo = Pedido.objects.order_by('-id').values_list('id', flat=True).first() or 0
+    lista = []
+    if desde:
+        for p in Pedido.objects.filter(id__gt=desde).select_related('cliente__usuario').order_by('id')[:10]:
+            lista.append({'id': p.id, 'cliente': str(p.cliente), 'total': f'${p.total:,.0f}',
+                          'url': reverse('pedidos:gestion_detalle', args=[p.id])})
+    return JsonResponse({'ultimo': ultimo, 'pendientes': pendientes, 'nuevos': lista})
 
 
 @gestion_pedidos

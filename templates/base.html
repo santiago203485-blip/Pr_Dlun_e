@@ -72,6 +72,12 @@
         <header class="panel-barra">
             <label for="menu-panel" class="boton-menu" aria-label="Abrir menú"><i class="bi bi-list"></i></label>
             <span class="panel-rol">{{ user.get_rol_display }}</span>
+            {% if user.es_admin or user.rol == 'vendedor' %}
+            <a href="{% url 'pedidos:gestion' %}" class="aviso-pedidos" id="aviso-pedidos" title="Pedidos por atender"
+               data-url="{% url 'pedidos:nuevos' %}">
+                <i class="bi bi-bell"></i><span class="contador" hidden></span>
+            </a>
+            {% endif %}
             <div class="panel-usuario">
                 <span class="avatar">{{ user.first_name|default:user.username|first|upper }}</span>
                 <span class="nombre-usuario">{{ user.get_full_name|default:user.username }}</span>
@@ -182,6 +188,73 @@
     </div>
     <p class="pie-final">{{ tienda.nombre_tienda }} &copy; {% now "Y" %}{% if tienda.nombre_responsable %} · {{ tienda.nombre_responsable }}{% endif %}</p>
 </footer>
+{% endif %}
+{% if user.is_authenticated and user.es_admin or user.is_authenticated and user.rol == 'vendedor' %}
+<div id="toasts-pedidos" class="toasts-pedidos" aria-live="polite"></div>
+<script>
+(function () {
+    var campana = document.getElementById('aviso-pedidos');
+    if (!campana) return;
+    var contador = campana.querySelector('.contador');
+    var cajaToasts = document.getElementById('toasts-pedidos');
+    var tituloBase = document.title;
+    var CLAVE = 'dlune_ultimo_pedido';
+    var ultimo = 0;
+    try { ultimo = parseInt(localStorage.getItem(CLAVE) || '0', 10) || 0; } catch (e) {}
+
+    if ('Notification' in window && Notification.permission === 'default') {
+        document.addEventListener('click', function pedir() {
+            Notification.requestPermission();
+            document.removeEventListener('click', pedir);
+        });
+    }
+
+    function sonar() {
+        try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            [0, 0.18].forEach(function (t) {
+                var o = ctx.createOscillator(), g = ctx.createGain();
+                o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+                g.gain.setValueAtTime(0.25, ctx.currentTime + t);
+                g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.15);
+                o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.16);
+            });
+        } catch (e) {}
+    }
+
+    function mostrar(p) {
+        var t = document.createElement('a');
+        t.className = 'toast-pedido'; t.href = p.url;
+        t.innerHTML = '<i class="bi bi-bag-check"></i><div><strong>Nuevo pedido #' + p.id + '</strong><span></span></div>';
+        t.querySelector('span').textContent = p.cliente + ' · ' + p.total;
+        cajaToasts.appendChild(t);
+        setTimeout(function () { t.remove(); }, 20000);
+        if ('Notification' in window && Notification.permission === 'granted') {
+            var n = new Notification('Nuevo pedido #' + p.id, { body: p.cliente + ' · ' + p.total, tag: 'pedido-' + p.id });
+            n.onclick = function () { window.focus(); location.href = p.url; };
+        }
+    }
+
+    function consultar() {
+        fetch(campana.dataset.url + '?desde=' + ultimo, { credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) {
+                if (!d) return;
+                contador.hidden = !d.pendientes;
+                contador.textContent = d.pendientes;
+                document.title = (d.pendientes ? '(' + d.pendientes + ') ' : '') + tituloBase;
+                if (ultimo && d.nuevos.length) { d.nuevos.forEach(mostrar); sonar(); }
+                if (d.ultimo > ultimo) {
+                    ultimo = d.ultimo;
+                    try { localStorage.setItem(CLAVE, String(ultimo)); } catch (e) {}
+                }
+            })
+            .catch(function () {});
+    }
+    consultar();
+    setInterval(consultar, 15000);
+})();
+</script>
 {% endif %}
 </body>
 </html>
